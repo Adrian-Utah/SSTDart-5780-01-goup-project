@@ -1,0 +1,417 @@
+ARM GAS  /tmp/ccNABeIe.s 			page 1
+
+
+   1              		.cpu cortex-m0
+   2              		.arch armv6s-m
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 1
+  11              		.eabi_attribute 34, 0
+  12              		.eabi_attribute 18, 4
+  13              		.file	"main.c"
+  14              		.text
+  15              	.Ltext0:
+  16              		.cfi_sections	.debug_frame
+  17              		.file 1 "Src/main.c"
+  18              		.section	.text.delay_loop,"ax",%progbits
+  19              		.align	1
+  20              		.syntax unified
+  21              		.code	16
+  22              		.thumb_func
+  24              	delay_loop:
+  25              	.LVL0:
+  26              	.LFB41:
+   1:Src/main.c    **** #include "main.h"
+   2:Src/main.c    **** #include "dac.h"
+   3:Src/main.c    **** 
+   4:Src/main.c    **** #define LED_PIN 9u   // green LED
+   5:Src/main.c    **** 
+   6:Src/main.c    **** void SystemClock_Config(void)
+   7:Src/main.c    **** {
+   8:Src/main.c    **** }
+   9:Src/main.c    **** 
+  10:Src/main.c    **** static void delay_loop(volatile uint32_t t)
+  11:Src/main.c    **** {
+  27              		.loc 1 11 1 view -0
+  28              		.cfi_startproc
+  29              		@ args = 0, pretend = 0, frame = 8
+  30              		@ frame_needed = 0, uses_anonymous_args = 0
+  31              		@ link register save eliminated.
+  32              		.loc 1 11 1 is_stmt 0 view .LVU1
+  33 0000 82B0     		sub	sp, sp, #8
+  34              	.LCFI0:
+  35              		.cfi_def_cfa_offset 8
+  36 0002 0190     		str	r0, [sp, #4]
+  12:Src/main.c    ****     while (t--) {
+  37              		.loc 1 12 5 is_stmt 1 view .LVU2
+  38              		.loc 1 12 11 is_stmt 0 view .LVU3
+  39 0004 00E0     		b	.L2
+  40              	.L3:
+  13:Src/main.c    ****         __asm__("nop");
+  41              		.loc 1 13 9 is_stmt 1 view .LVU4
+  42              		.syntax divided
+  43              	@ 13 "Src/main.c" 1
+  44 0006 C046     		nop
+  45              	@ 0 "" 2
+ARM GAS  /tmp/ccNABeIe.s 			page 2
+
+
+  46              		.thumb
+  47              		.syntax unified
+  48              	.L2:
+  12:Src/main.c    ****     while (t--) {
+  49              		.loc 1 12 12 view .LVU5
+  12:Src/main.c    ****     while (t--) {
+  50              		.loc 1 12 13 is_stmt 0 view .LVU6
+  51 0008 019B     		ldr	r3, [sp, #4]
+  52 000a 5A1E     		subs	r2, r3, #1
+  53 000c 0192     		str	r2, [sp, #4]
+  12:Src/main.c    ****     while (t--) {
+  54              		.loc 1 12 12 view .LVU7
+  55 000e 002B     		cmp	r3, #0
+  56 0010 F9D1     		bne	.L3
+  14:Src/main.c    ****     }
+  15:Src/main.c    **** }
+  57              		.loc 1 15 1 view .LVU8
+  58 0012 02B0     		add	sp, sp, #8
+  59              		@ sp needed
+  60 0014 7047     		bx	lr
+  61              		.cfi_endproc
+  62              	.LFE41:
+  64              		.section	.text.green_led_init,"ax",%progbits
+  65              		.align	1
+  66              		.syntax unified
+  67              		.code	16
+  68              		.thumb_func
+  70              	green_led_init:
+  71              	.LFB42:
+  16:Src/main.c    **** 
+  17:Src/main.c    **** static void green_led_init(void)
+  18:Src/main.c    **** {
+  72              		.loc 1 18 1 is_stmt 1 view -0
+  73              		.cfi_startproc
+  74              		@ args = 0, pretend = 0, frame = 0
+  75              		@ frame_needed = 0, uses_anonymous_args = 0
+  76              		@ link register save eliminated.
+  19:Src/main.c    ****     RCC->AHBENR |= RCC_AHBENR_GPIOCEN;
+  77              		.loc 1 19 5 view .LVU10
+  78              		.loc 1 19 8 is_stmt 0 view .LVU11
+  79 0000 084A     		ldr	r2, .L5
+  80 0002 5169     		ldr	r1, [r2, #20]
+  81              		.loc 1 19 17 view .LVU12
+  82 0004 8023     		movs	r3, #128
+  83 0006 1B03     		lsls	r3, r3, #12
+  84 0008 0B43     		orrs	r3, r1
+  85 000a 5361     		str	r3, [r2, #20]
+  20:Src/main.c    **** 
+  21:Src/main.c    ****     GPIOC->MODER &= ~(3u << (LED_PIN * 2));
+  86              		.loc 1 21 5 is_stmt 1 view .LVU13
+  87              		.loc 1 21 10 is_stmt 0 view .LVU14
+  88 000c 064B     		ldr	r3, .L5+4
+  89 000e 1A68     		ldr	r2, [r3]
+  90              		.loc 1 21 18 view .LVU15
+  91 0010 0649     		ldr	r1, .L5+8
+  92 0012 0A40     		ands	r2, r1
+  93 0014 1A60     		str	r2, [r3]
+ARM GAS  /tmp/ccNABeIe.s 			page 3
+
+
+  22:Src/main.c    ****     GPIOC->MODER |=  (1u << (LED_PIN * 2));
+  94              		.loc 1 22 5 is_stmt 1 view .LVU16
+  95              		.loc 1 22 10 is_stmt 0 view .LVU17
+  96 0016 1968     		ldr	r1, [r3]
+  97              		.loc 1 22 18 view .LVU18
+  98 0018 8022     		movs	r2, #128
+  99 001a D202     		lsls	r2, r2, #11
+ 100 001c 0A43     		orrs	r2, r1
+ 101 001e 1A60     		str	r2, [r3]
+  23:Src/main.c    **** }
+ 102              		.loc 1 23 1 view .LVU19
+ 103              		@ sp needed
+ 104 0020 7047     		bx	lr
+ 105              	.L6:
+ 106 0022 C046     		.align	2
+ 107              	.L5:
+ 108 0024 00100240 		.word	1073876992
+ 109 0028 00080048 		.word	1207961600
+ 110 002c FFFFF3FF 		.word	-786433
+ 111              		.cfi_endproc
+ 112              	.LFE42:
+ 114              		.section	.text.green_led_on,"ax",%progbits
+ 115              		.align	1
+ 116              		.syntax unified
+ 117              		.code	16
+ 118              		.thumb_func
+ 120              	green_led_on:
+ 121              	.LFB43:
+  24:Src/main.c    **** 
+  25:Src/main.c    **** static void green_led_on(void)
+  26:Src/main.c    **** {
+ 122              		.loc 1 26 1 is_stmt 1 view -0
+ 123              		.cfi_startproc
+ 124              		@ args = 0, pretend = 0, frame = 0
+ 125              		@ frame_needed = 0, uses_anonymous_args = 0
+ 126              		@ link register save eliminated.
+  27:Src/main.c    ****     GPIOC->BSRR = (1u << LED_PIN);
+ 127              		.loc 1 27 5 view .LVU21
+ 128              		.loc 1 27 17 is_stmt 0 view .LVU22
+ 129 0000 024B     		ldr	r3, .L8
+ 130 0002 8022     		movs	r2, #128
+ 131 0004 9200     		lsls	r2, r2, #2
+ 132 0006 9A61     		str	r2, [r3, #24]
+  28:Src/main.c    **** }
+ 133              		.loc 1 28 1 view .LVU23
+ 134              		@ sp needed
+ 135 0008 7047     		bx	lr
+ 136              	.L9:
+ 137 000a C046     		.align	2
+ 138              	.L8:
+ 139 000c 00080048 		.word	1207961600
+ 140              		.cfi_endproc
+ 141              	.LFE43:
+ 143              		.section	.text.green_led_off,"ax",%progbits
+ 144              		.align	1
+ 145              		.syntax unified
+ 146              		.code	16
+ARM GAS  /tmp/ccNABeIe.s 			page 4
+
+
+ 147              		.thumb_func
+ 149              	green_led_off:
+ 150              	.LFB44:
+  29:Src/main.c    **** 
+  30:Src/main.c    **** static void green_led_off(void)
+  31:Src/main.c    **** {
+ 151              		.loc 1 31 1 is_stmt 1 view -0
+ 152              		.cfi_startproc
+ 153              		@ args = 0, pretend = 0, frame = 0
+ 154              		@ frame_needed = 0, uses_anonymous_args = 0
+ 155              		@ link register save eliminated.
+  32:Src/main.c    ****     GPIOC->BSRR = (1u << (LED_PIN + 16u));
+ 156              		.loc 1 32 5 view .LVU25
+ 157              		.loc 1 32 17 is_stmt 0 view .LVU26
+ 158 0000 024B     		ldr	r3, .L11
+ 159 0002 8022     		movs	r2, #128
+ 160 0004 9204     		lsls	r2, r2, #18
+ 161 0006 9A61     		str	r2, [r3, #24]
+  33:Src/main.c    **** }
+ 162              		.loc 1 33 1 view .LVU27
+ 163              		@ sp needed
+ 164 0008 7047     		bx	lr
+ 165              	.L12:
+ 166 000a C046     		.align	2
+ 167              	.L11:
+ 168 000c 00080048 		.word	1207961600
+ 169              		.cfi_endproc
+ 170              	.LFE44:
+ 172              		.section	.text.SystemClock_Config,"ax",%progbits
+ 173              		.align	1
+ 174              		.global	SystemClock_Config
+ 175              		.syntax unified
+ 176              		.code	16
+ 177              		.thumb_func
+ 179              	SystemClock_Config:
+ 180              	.LFB40:
+   7:Src/main.c    **** }
+ 181              		.loc 1 7 1 is_stmt 1 view -0
+ 182              		.cfi_startproc
+ 183              		@ args = 0, pretend = 0, frame = 0
+ 184              		@ frame_needed = 0, uses_anonymous_args = 0
+ 185              		@ link register save eliminated.
+   8:Src/main.c    **** 
+ 186              		.loc 1 8 1 view .LVU29
+ 187              		@ sp needed
+ 188 0000 7047     		bx	lr
+ 189              		.cfi_endproc
+ 190              	.LFE40:
+ 192              		.section	.text.main,"ax",%progbits
+ 193              		.align	1
+ 194              		.global	main
+ 195              		.syntax unified
+ 196              		.code	16
+ 197              		.thumb_func
+ 199              	main:
+ 200              	.LFB45:
+  34:Src/main.c    **** 
+ARM GAS  /tmp/ccNABeIe.s 			page 5
+
+
+  35:Src/main.c    **** int main(void)
+  36:Src/main.c    **** {
+ 201              		.loc 1 36 1 view -0
+ 202              		.cfi_startproc
+ 203              		@ Volatile: function does not return.
+ 204              		@ args = 0, pretend = 0, frame = 0
+ 205              		@ frame_needed = 0, uses_anonymous_args = 0
+ 206 0000 10B5     		push	{r4, lr}
+ 207              	.LCFI1:
+ 208              		.cfi_def_cfa_offset 8
+ 209              		.cfi_offset 4, -8
+ 210              		.cfi_offset 14, -4
+  37:Src/main.c    ****     HAL_Init();
+ 211              		.loc 1 37 5 view .LVU31
+ 212 0002 FFF7FEFF 		bl	HAL_Init
+ 213              	.LVL1:
+  38:Src/main.c    ****     SystemClock_Config();
+ 214              		.loc 1 38 5 view .LVU32
+  39:Src/main.c    **** 
+  40:Src/main.c    ****     // Initialize LED and DAC hardware
+  41:Src/main.c    ****     green_led_init();
+ 215              		.loc 1 41 5 view .LVU33
+ 216 0006 FFF7FEFF 		bl	green_led_init
+ 217              	.LVL2:
+  42:Src/main.c    ****     dac_init();
+ 218              		.loc 1 42 5 view .LVU34
+ 219 000a FFF7FEFF 		bl	dac_init
+ 220              	.LVL3:
+  43:Src/main.c    **** 
+  44:Src/main.c    ****     // Blink twice to show program loaded
+  45:Src/main.c    ****     green_led_off();
+ 221              		.loc 1 45 5 view .LVU35
+ 222 000e FFF7FEFF 		bl	green_led_off
+ 223              	.LVL4:
+  46:Src/main.c    ****     delay_loop(300000);
+ 224              		.loc 1 46 5 view .LVU36
+ 225 0012 184C     		ldr	r4, .L16
+ 226 0014 2000     		movs	r0, r4
+ 227 0016 FFF7FEFF 		bl	delay_loop
+ 228              	.LVL5:
+  47:Src/main.c    **** 
+  48:Src/main.c    ****     green_led_on();
+ 229              		.loc 1 48 5 view .LVU37
+ 230 001a FFF7FEFF 		bl	green_led_on
+ 231              	.LVL6:
+  49:Src/main.c    ****     delay_loop(300000);
+ 232              		.loc 1 49 5 view .LVU38
+ 233 001e 2000     		movs	r0, r4
+ 234 0020 FFF7FEFF 		bl	delay_loop
+ 235              	.LVL7:
+  50:Src/main.c    ****     green_led_off();
+ 236              		.loc 1 50 5 view .LVU39
+ 237 0024 FFF7FEFF 		bl	green_led_off
+ 238              	.LVL8:
+  51:Src/main.c    ****     delay_loop(300000);
+ 239              		.loc 1 51 5 view .LVU40
+ 240 0028 2000     		movs	r0, r4
+ARM GAS  /tmp/ccNABeIe.s 			page 6
+
+
+ 241 002a FFF7FEFF 		bl	delay_loop
+ 242              	.LVL9:
+  52:Src/main.c    **** 
+  53:Src/main.c    ****     green_led_on();
+ 243              		.loc 1 53 5 view .LVU41
+ 244 002e FFF7FEFF 		bl	green_led_on
+ 245              	.LVL10:
+  54:Src/main.c    ****     delay_loop(300000);
+ 246              		.loc 1 54 5 view .LVU42
+ 247 0032 2000     		movs	r0, r4
+ 248 0034 FFF7FEFF 		bl	delay_loop
+ 249              	.LVL11:
+  55:Src/main.c    ****     green_led_off();
+ 250              		.loc 1 55 5 view .LVU43
+ 251 0038 FFF7FEFF 		bl	green_led_off
+ 252              	.LVL12:
+  56:Src/main.c    ****     delay_loop(300000);
+ 253              		.loc 1 56 5 view .LVU44
+ 254 003c 2000     		movs	r0, r4
+ 255 003e FFF7FEFF 		bl	delay_loop
+ 256              	.LVL13:
+  57:Src/main.c    **** 
+  58:Src/main.c    ****     // Leave LED on after successful startup
+  59:Src/main.c    ****     green_led_on();
+ 257              		.loc 1 59 5 view .LVU45
+ 258 0042 FFF7FEFF 		bl	green_led_on
+ 259              	.LVL14:
+ 260              	.L15:
+  60:Src/main.c    **** 
+  61:Src/main.c    ****     // NOTE: need to verify DAC is working
+  62:Src/main.c    ****     while (1) {
+ 261              		.loc 1 62 5 view .LVU46
+  63:Src/main.c    ****         dac_write(512);
+ 262              		.loc 1 63 9 view .LVU47
+ 263 0046 8020     		movs	r0, #128
+ 264 0048 8000     		lsls	r0, r0, #2
+ 265 004a FFF7FEFF 		bl	dac_write
+ 266              	.LVL15:
+  64:Src/main.c    ****         delay_loop(200000);
+ 267              		.loc 1 64 9 view .LVU48
+ 268 004e 0A4C     		ldr	r4, .L16+4
+ 269 0050 2000     		movs	r0, r4
+ 270 0052 FFF7FEFF 		bl	delay_loop
+ 271              	.LVL16:
+  65:Src/main.c    **** 
+  66:Src/main.c    ****         dac_write(2048);
+ 272              		.loc 1 66 9 view .LVU49
+ 273 0056 8020     		movs	r0, #128
+ 274 0058 0001     		lsls	r0, r0, #4
+ 275 005a FFF7FEFF 		bl	dac_write
+ 276              	.LVL17:
+  67:Src/main.c    ****         delay_loop(200000);
+ 277              		.loc 1 67 9 view .LVU50
+ 278 005e 2000     		movs	r0, r4
+ 279 0060 FFF7FEFF 		bl	delay_loop
+ 280              	.LVL18:
+  68:Src/main.c    **** 
+ARM GAS  /tmp/ccNABeIe.s 			page 7
+
+
+  69:Src/main.c    ****         dac_write(3584);
+ 281              		.loc 1 69 9 view .LVU51
+ 282 0064 E020     		movs	r0, #224
+ 283 0066 0001     		lsls	r0, r0, #4
+ 284 0068 FFF7FEFF 		bl	dac_write
+ 285              	.LVL19:
+  70:Src/main.c    ****         delay_loop(200000);
+ 286              		.loc 1 70 9 discriminator 1 view .LVU52
+ 287 006c 2000     		movs	r0, r4
+ 288 006e FFF7FEFF 		bl	delay_loop
+ 289              	.LVL20:
+  62:Src/main.c    ****         dac_write(512);
+ 290              		.loc 1 62 11 view .LVU53
+ 291 0072 E8E7     		b	.L15
+ 292              	.L17:
+ 293              		.align	2
+ 294              	.L16:
+ 295 0074 E0930400 		.word	300000
+ 296 0078 400D0300 		.word	200000
+ 297              		.cfi_endproc
+ 298              	.LFE45:
+ 300              		.text
+ 301              	.Letext0:
+ 302              		.file 2 "/usr/lib/gcc/arm-none-eabi/13.2.1/include/stdint.h"
+ 303              		.file 3 "Drivers/CMSIS/Device/ST/STM32F0xx/Include/stm32f072xb.h"
+ 304              		.file 4 "Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_def.h"
+ 305              		.file 5 "Inc/dac.h"
+ 306              		.file 6 "Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal.h"
+ARM GAS  /tmp/ccNABeIe.s 			page 8
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 main.c
+     /tmp/ccNABeIe.s:19     .text.delay_loop:00000000 $t
+     /tmp/ccNABeIe.s:24     .text.delay_loop:00000000 delay_loop
+     /tmp/ccNABeIe.s:65     .text.green_led_init:00000000 $t
+     /tmp/ccNABeIe.s:70     .text.green_led_init:00000000 green_led_init
+     /tmp/ccNABeIe.s:108    .text.green_led_init:00000024 $d
+     /tmp/ccNABeIe.s:115    .text.green_led_on:00000000 $t
+     /tmp/ccNABeIe.s:120    .text.green_led_on:00000000 green_led_on
+     /tmp/ccNABeIe.s:139    .text.green_led_on:0000000c $d
+     /tmp/ccNABeIe.s:144    .text.green_led_off:00000000 $t
+     /tmp/ccNABeIe.s:149    .text.green_led_off:00000000 green_led_off
+     /tmp/ccNABeIe.s:168    .text.green_led_off:0000000c $d
+     /tmp/ccNABeIe.s:173    .text.SystemClock_Config:00000000 $t
+     /tmp/ccNABeIe.s:179    .text.SystemClock_Config:00000000 SystemClock_Config
+     /tmp/ccNABeIe.s:193    .text.main:00000000 $t
+     /tmp/ccNABeIe.s:199    .text.main:00000000 main
+     /tmp/ccNABeIe.s:295    .text.main:00000074 $d
+
+UNDEFINED SYMBOLS
+HAL_Init
+dac_init
+dac_write

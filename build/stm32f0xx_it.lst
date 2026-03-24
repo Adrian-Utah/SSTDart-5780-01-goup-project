@@ -1,0 +1,227 @@
+ARM GAS  /tmp/ccCyRZT5.s 			page 1
+
+
+   1              		.cpu cortex-m0
+   2              		.arch armv6s-m
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 1
+  11              		.eabi_attribute 34, 0
+  12              		.eabi_attribute 18, 4
+  13              		.file	"stm32f0xx_it.c"
+  14              		.text
+  15              	.Ltext0:
+  16              		.cfi_sections	.debug_frame
+  17              		.file 1 "Src/stm32f0xx_it.c"
+  18              		.section	.text.NMI_Handler,"ax",%progbits
+  19              		.align	1
+  20              		.global	NMI_Handler
+  21              		.syntax unified
+  22              		.code	16
+  23              		.thumb_func
+  25              	NMI_Handler:
+  26              	.LFB40:
+   1:Src/stm32f0xx_it.c **** /**
+   2:Src/stm32f0xx_it.c ****   ******************************************************************************
+   3:Src/stm32f0xx_it.c ****   * @file    Templates/Src/stm32f0xx_it.c
+   4:Src/stm32f0xx_it.c ****   * @author  MCD Application Team
+   5:Src/stm32f0xx_it.c ****   * @brief   Main Interrupt Service Routines.
+   6:Src/stm32f0xx_it.c ****   *          This file provides template for all exceptions handler and
+   7:Src/stm32f0xx_it.c ****   *          peripherals interrupt service routine.
+   8:Src/stm32f0xx_it.c ****   ******************************************************************************
+   9:Src/stm32f0xx_it.c ****   * @attention
+  10:Src/stm32f0xx_it.c ****   *
+  11:Src/stm32f0xx_it.c ****   * Copyright (c) 2016 STMicroelectronics.
+  12:Src/stm32f0xx_it.c ****   * All rights reserved.
+  13:Src/stm32f0xx_it.c ****   *
+  14:Src/stm32f0xx_it.c ****   * This software is licensed under terms that can be found in the LICENSE file
+  15:Src/stm32f0xx_it.c ****   * in the root directory of this software component.
+  16:Src/stm32f0xx_it.c ****   * If no LICENSE file comes with this software, it is provided AS-IS.
+  17:Src/stm32f0xx_it.c ****   *
+  18:Src/stm32f0xx_it.c ****   ******************************************************************************
+  19:Src/stm32f0xx_it.c ****   */
+  20:Src/stm32f0xx_it.c **** #include "main.h"
+  21:Src/stm32f0xx_it.c **** #include <stm32f0xx_hal.h>
+  22:Src/stm32f0xx_it.c **** #include <stm32f0xx_it.h>
+  23:Src/stm32f0xx_it.c **** 
+  24:Src/stm32f0xx_it.c **** /******************************************************************************/
+  25:Src/stm32f0xx_it.c **** /*            Cortex-M0 Processor Exceptions Handlers                         */
+  26:Src/stm32f0xx_it.c **** /******************************************************************************/
+  27:Src/stm32f0xx_it.c **** 
+  28:Src/stm32f0xx_it.c **** /**
+  29:Src/stm32f0xx_it.c ****   * @brief   This function handles NMI exception.
+  30:Src/stm32f0xx_it.c ****   * @param  None
+  31:Src/stm32f0xx_it.c ****   * @retval None
+  32:Src/stm32f0xx_it.c ****   */
+ARM GAS  /tmp/ccCyRZT5.s 			page 2
+
+
+  33:Src/stm32f0xx_it.c **** void NMI_Handler(void)
+  34:Src/stm32f0xx_it.c **** {
+  27              		.loc 1 34 1 view -0
+  28              		.cfi_startproc
+  29              		@ args = 0, pretend = 0, frame = 0
+  30              		@ frame_needed = 0, uses_anonymous_args = 0
+  31              		@ link register save eliminated.
+  35:Src/stm32f0xx_it.c **** }
+  32              		.loc 1 35 1 view .LVU1
+  33              		@ sp needed
+  34 0000 7047     		bx	lr
+  35              		.cfi_endproc
+  36              	.LFE40:
+  38              		.section	.text.HardFault_Handler,"ax",%progbits
+  39              		.align	1
+  40              		.global	HardFault_Handler
+  41              		.syntax unified
+  42              		.code	16
+  43              		.thumb_func
+  45              	HardFault_Handler:
+  46              	.LFB41:
+  36:Src/stm32f0xx_it.c **** 
+  37:Src/stm32f0xx_it.c **** /**
+  38:Src/stm32f0xx_it.c ****   * @brief  This function handles Hard Fault exception.
+  39:Src/stm32f0xx_it.c ****   * @param  None
+  40:Src/stm32f0xx_it.c ****   * @retval None
+  41:Src/stm32f0xx_it.c ****   */
+  42:Src/stm32f0xx_it.c **** void HardFault_Handler(void)
+  43:Src/stm32f0xx_it.c **** {
+  47              		.loc 1 43 1 view -0
+  48              		.cfi_startproc
+  49              		@ Volatile: function does not return.
+  50              		@ args = 0, pretend = 0, frame = 0
+  51              		@ frame_needed = 0, uses_anonymous_args = 0
+  52              		@ link register save eliminated.
+  53              	.L3:
+  44:Src/stm32f0xx_it.c ****   /* Go to infinite loop when Hard Fault exception occurs */
+  45:Src/stm32f0xx_it.c ****   while (1)
+  54              		.loc 1 45 3 view .LVU3
+  46:Src/stm32f0xx_it.c ****   {
+  47:Src/stm32f0xx_it.c ****   }
+  55              		.loc 1 47 3 view .LVU4
+  45:Src/stm32f0xx_it.c ****   {
+  56              		.loc 1 45 9 view .LVU5
+  57 0000 FEE7     		b	.L3
+  58              		.cfi_endproc
+  59              	.LFE41:
+  61              		.section	.text.SVC_Handler,"ax",%progbits
+  62              		.align	1
+  63              		.global	SVC_Handler
+  64              		.syntax unified
+  65              		.code	16
+  66              		.thumb_func
+  68              	SVC_Handler:
+  69              	.LFB42:
+  48:Src/stm32f0xx_it.c **** }
+  49:Src/stm32f0xx_it.c **** 
+ARM GAS  /tmp/ccCyRZT5.s 			page 3
+
+
+  50:Src/stm32f0xx_it.c **** /**
+  51:Src/stm32f0xx_it.c ****   * @brief  This function handles SVCall exception.
+  52:Src/stm32f0xx_it.c ****   * @param  None
+  53:Src/stm32f0xx_it.c ****   * @retval None
+  54:Src/stm32f0xx_it.c ****   */
+  55:Src/stm32f0xx_it.c **** void SVC_Handler(void)
+  56:Src/stm32f0xx_it.c **** {
+  70              		.loc 1 56 1 view -0
+  71              		.cfi_startproc
+  72              		@ args = 0, pretend = 0, frame = 0
+  73              		@ frame_needed = 0, uses_anonymous_args = 0
+  74              		@ link register save eliminated.
+  57:Src/stm32f0xx_it.c **** }
+  75              		.loc 1 57 1 view .LVU7
+  76              		@ sp needed
+  77 0000 7047     		bx	lr
+  78              		.cfi_endproc
+  79              	.LFE42:
+  81              		.section	.text.PendSV_Handler,"ax",%progbits
+  82              		.align	1
+  83              		.global	PendSV_Handler
+  84              		.syntax unified
+  85              		.code	16
+  86              		.thumb_func
+  88              	PendSV_Handler:
+  89              	.LFB43:
+  58:Src/stm32f0xx_it.c **** 
+  59:Src/stm32f0xx_it.c **** /**
+  60:Src/stm32f0xx_it.c ****   * @brief  This function handles PendSVC exception.
+  61:Src/stm32f0xx_it.c ****   * @param  None
+  62:Src/stm32f0xx_it.c ****   * @retval None
+  63:Src/stm32f0xx_it.c ****   */
+  64:Src/stm32f0xx_it.c **** void PendSV_Handler(void)
+  65:Src/stm32f0xx_it.c **** {
+  90              		.loc 1 65 1 view -0
+  91              		.cfi_startproc
+  92              		@ args = 0, pretend = 0, frame = 0
+  93              		@ frame_needed = 0, uses_anonymous_args = 0
+  94              		@ link register save eliminated.
+  66:Src/stm32f0xx_it.c **** }
+  95              		.loc 1 66 1 view .LVU9
+  96              		@ sp needed
+  97 0000 7047     		bx	lr
+  98              		.cfi_endproc
+  99              	.LFE43:
+ 101              		.section	.text.SysTick_Handler,"ax",%progbits
+ 102              		.align	1
+ 103              		.global	SysTick_Handler
+ 104              		.syntax unified
+ 105              		.code	16
+ 106              		.thumb_func
+ 108              	SysTick_Handler:
+ 109              	.LFB44:
+  67:Src/stm32f0xx_it.c **** 
+  68:Src/stm32f0xx_it.c **** /**
+  69:Src/stm32f0xx_it.c ****   * @brief  This function handles SysTick Handler.
+  70:Src/stm32f0xx_it.c ****   * @param  None
+ARM GAS  /tmp/ccCyRZT5.s 			page 4
+
+
+  71:Src/stm32f0xx_it.c ****   * @retval None
+  72:Src/stm32f0xx_it.c ****   */
+  73:Src/stm32f0xx_it.c **** void SysTick_Handler(void)
+  74:Src/stm32f0xx_it.c **** {
+ 110              		.loc 1 74 1 view -0
+ 111              		.cfi_startproc
+ 112              		@ args = 0, pretend = 0, frame = 0
+ 113              		@ frame_needed = 0, uses_anonymous_args = 0
+ 114 0000 10B5     		push	{r4, lr}
+ 115              	.LCFI0:
+ 116              		.cfi_def_cfa_offset 8
+ 117              		.cfi_offset 4, -8
+ 118              		.cfi_offset 14, -4
+  75:Src/stm32f0xx_it.c ****     HAL_IncTick();
+ 119              		.loc 1 75 5 view .LVU11
+ 120 0002 FFF7FEFF 		bl	HAL_IncTick
+ 121              	.LVL0:
+  76:Src/stm32f0xx_it.c **** }
+ 122              		.loc 1 76 1 is_stmt 0 view .LVU12
+ 123              		@ sp needed
+ 124 0006 10BD     		pop	{r4, pc}
+ 125              		.cfi_endproc
+ 126              	.LFE44:
+ 128              		.text
+ 129              	.Letext0:
+ 130              		.file 2 "Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal.h"
+ARM GAS  /tmp/ccCyRZT5.s 			page 5
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 stm32f0xx_it.c
+     /tmp/ccCyRZT5.s:19     .text.NMI_Handler:00000000 $t
+     /tmp/ccCyRZT5.s:25     .text.NMI_Handler:00000000 NMI_Handler
+     /tmp/ccCyRZT5.s:39     .text.HardFault_Handler:00000000 $t
+     /tmp/ccCyRZT5.s:45     .text.HardFault_Handler:00000000 HardFault_Handler
+     /tmp/ccCyRZT5.s:62     .text.SVC_Handler:00000000 $t
+     /tmp/ccCyRZT5.s:68     .text.SVC_Handler:00000000 SVC_Handler
+     /tmp/ccCyRZT5.s:82     .text.PendSV_Handler:00000000 $t
+     /tmp/ccCyRZT5.s:88     .text.PendSV_Handler:00000000 PendSV_Handler
+     /tmp/ccCyRZT5.s:102    .text.SysTick_Handler:00000000 $t
+     /tmp/ccCyRZT5.s:108    .text.SysTick_Handler:00000000 SysTick_Handler
+
+UNDEFINED SYMBOLS
+HAL_IncTick

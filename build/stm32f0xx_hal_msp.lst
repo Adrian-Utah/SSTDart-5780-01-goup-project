@@ -1,0 +1,114 @@
+ARM GAS  /tmp/ccg6xDvy.s 			page 1
+
+
+   1              		.cpu cortex-m0
+   2              		.arch armv6s-m
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 1
+  11              		.eabi_attribute 34, 0
+  12              		.eabi_attribute 18, 4
+  13              		.file	"stm32f0xx_hal_msp.c"
+  14              		.text
+  15              	.Ltext0:
+  16              		.cfi_sections	.debug_frame
+  17              		.file 1 "Src/stm32f0xx_hal_msp.c"
+  18              		.section	.text.HAL_MspInit,"ax",%progbits
+  19              		.align	1
+  20              		.global	HAL_MspInit
+  21              		.syntax unified
+  22              		.code	16
+  23              		.thumb_func
+  25              	HAL_MspInit:
+  26              	.LFB40:
+   1:Src/stm32f0xx_hal_msp.c **** /**
+   2:Src/stm32f0xx_hal_msp.c ****   ******************************************************************************
+   3:Src/stm32f0xx_hal_msp.c ****   * @file    Templates/Src/stm32f0xx_hal_msp.c
+   4:Src/stm32f0xx_hal_msp.c ****   * @author  MCD Application Team
+   5:Src/stm32f0xx_hal_msp.c ****   * @brief   HAL MSP module.
+   6:Src/stm32f0xx_hal_msp.c ****   ******************************************************************************
+   7:Src/stm32f0xx_hal_msp.c ****   * @attention
+   8:Src/stm32f0xx_hal_msp.c ****   *
+   9:Src/stm32f0xx_hal_msp.c ****   * Copyright (c) 2016 STMicroelectronics.
+  10:Src/stm32f0xx_hal_msp.c ****   * All rights reserved.
+  11:Src/stm32f0xx_hal_msp.c ****   *
+  12:Src/stm32f0xx_hal_msp.c ****   * This software is licensed under terms that can be found in the LICENSE file
+  13:Src/stm32f0xx_hal_msp.c ****   * in the root directory of this software component.
+  14:Src/stm32f0xx_hal_msp.c ****   * If no LICENSE file comes with this software, it is provided AS-IS.
+  15:Src/stm32f0xx_hal_msp.c ****   *
+  16:Src/stm32f0xx_hal_msp.c ****   ******************************************************************************
+  17:Src/stm32f0xx_hal_msp.c ****   */ 
+  18:Src/stm32f0xx_hal_msp.c **** #include "main.h"
+  19:Src/stm32f0xx_hal_msp.c **** 
+  20:Src/stm32f0xx_hal_msp.c **** /** @defgroup HAL_MSP_Private_Functions
+  21:Src/stm32f0xx_hal_msp.c ****   * @{
+  22:Src/stm32f0xx_hal_msp.c ****   */
+  23:Src/stm32f0xx_hal_msp.c **** 
+  24:Src/stm32f0xx_hal_msp.c **** /**
+  25:Src/stm32f0xx_hal_msp.c ****   * @brief  Initializes the Global MSP.
+  26:Src/stm32f0xx_hal_msp.c ****   * @param  None
+  27:Src/stm32f0xx_hal_msp.c ****   * @retval None
+  28:Src/stm32f0xx_hal_msp.c ****   */
+  29:Src/stm32f0xx_hal_msp.c **** void HAL_MspInit(void)
+  30:Src/stm32f0xx_hal_msp.c **** {
+  27              		.loc 1 30 1 view -0
+  28              		.cfi_startproc
+ARM GAS  /tmp/ccg6xDvy.s 			page 2
+
+
+  29              		@ args = 0, pretend = 0, frame = 0
+  30              		@ frame_needed = 0, uses_anonymous_args = 0
+  31              		@ link register save eliminated.
+  31:Src/stm32f0xx_hal_msp.c ****  
+  32:Src/stm32f0xx_hal_msp.c **** }
+  32              		.loc 1 32 1 view .LVU1
+  33              		@ sp needed
+  34 0000 7047     		bx	lr
+  35              		.cfi_endproc
+  36              	.LFE40:
+  38              		.section	.text.HAL_MspDeInit,"ax",%progbits
+  39              		.align	1
+  40              		.global	HAL_MspDeInit
+  41              		.syntax unified
+  42              		.code	16
+  43              		.thumb_func
+  45              	HAL_MspDeInit:
+  46              	.LFB41:
+  33:Src/stm32f0xx_hal_msp.c **** 
+  34:Src/stm32f0xx_hal_msp.c **** /**
+  35:Src/stm32f0xx_hal_msp.c ****   * @brief  DeInitializes the Global MSP.
+  36:Src/stm32f0xx_hal_msp.c ****   * @param  None  
+  37:Src/stm32f0xx_hal_msp.c ****   * @retval None
+  38:Src/stm32f0xx_hal_msp.c ****   */
+  39:Src/stm32f0xx_hal_msp.c **** void HAL_MspDeInit(void)
+  40:Src/stm32f0xx_hal_msp.c **** {
+  47              		.loc 1 40 1 view -0
+  48              		.cfi_startproc
+  49              		@ args = 0, pretend = 0, frame = 0
+  50              		@ frame_needed = 0, uses_anonymous_args = 0
+  51              		@ link register save eliminated.
+  41:Src/stm32f0xx_hal_msp.c **** 
+  42:Src/stm32f0xx_hal_msp.c **** }
+  52              		.loc 1 42 1 view .LVU3
+  53              		@ sp needed
+  54 0000 7047     		bx	lr
+  55              		.cfi_endproc
+  56              	.LFE41:
+  58              		.text
+  59              	.Letext0:
+ARM GAS  /tmp/ccg6xDvy.s 			page 3
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 stm32f0xx_hal_msp.c
+     /tmp/ccg6xDvy.s:19     .text.HAL_MspInit:00000000 $t
+     /tmp/ccg6xDvy.s:25     .text.HAL_MspInit:00000000 HAL_MspInit
+     /tmp/ccg6xDvy.s:39     .text.HAL_MspDeInit:00000000 $t
+     /tmp/ccg6xDvy.s:45     .text.HAL_MspDeInit:00000000 HAL_MspDeInit
+
+NO UNDEFINED SYMBOLS

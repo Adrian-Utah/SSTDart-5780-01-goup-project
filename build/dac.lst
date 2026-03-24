@@ -1,0 +1,161 @@
+ARM GAS  /tmp/cc9Smu8O.s 			page 1
+
+
+   1              		.cpu cortex-m0
+   2              		.arch armv6s-m
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 1
+  11              		.eabi_attribute 34, 0
+  12              		.eabi_attribute 18, 4
+  13              		.file	"dac.c"
+  14              		.text
+  15              	.Ltext0:
+  16              		.cfi_sections	.debug_frame
+  17              		.file 1 "Src/dac.c"
+  18              		.section	.text.dac_init,"ax",%progbits
+  19              		.align	1
+  20              		.global	dac_init
+  21              		.syntax unified
+  22              		.code	16
+  23              		.thumb_func
+  25              	dac_init:
+  26              	.LFB40:
+   1:Src/dac.c     **** #include "dac.h"
+   2:Src/dac.c     **** 
+   3:Src/dac.c     **** void dac_init(void)
+   4:Src/dac.c     **** {
+  27              		.loc 1 4 1 view -0
+  28              		.cfi_startproc
+  29              		@ args = 0, pretend = 0, frame = 0
+  30              		@ frame_needed = 0, uses_anonymous_args = 0
+  31              		@ link register save eliminated.
+   5:Src/dac.c     ****     RCC->AHBENR |= RCC_AHBENR_GPIOAEN;
+  32              		.loc 1 5 5 view .LVU1
+  33              		.loc 1 5 8 is_stmt 0 view .LVU2
+  34 0000 0D4B     		ldr	r3, .L2
+  35 0002 5969     		ldr	r1, [r3, #20]
+  36              		.loc 1 5 17 view .LVU3
+  37 0004 8022     		movs	r2, #128
+  38 0006 9202     		lsls	r2, r2, #10
+  39 0008 0A43     		orrs	r2, r1
+  40 000a 5A61     		str	r2, [r3, #20]
+   6:Src/dac.c     ****     RCC->APB1ENR |= RCC_APB1ENR_DACEN;
+  41              		.loc 1 6 5 is_stmt 1 view .LVU4
+  42              		.loc 1 6 8 is_stmt 0 view .LVU5
+  43 000c D969     		ldr	r1, [r3, #28]
+  44              		.loc 1 6 18 view .LVU6
+  45 000e 8022     		movs	r2, #128
+  46 0010 9205     		lsls	r2, r2, #22
+  47 0012 0A43     		orrs	r2, r1
+  48 0014 DA61     		str	r2, [r3, #28]
+   7:Src/dac.c     **** 
+   8:Src/dac.c     ****     GPIOA->MODER &= ~(3u << (4 * 2));
+  49              		.loc 1 8 5 is_stmt 1 view .LVU7
+  50              		.loc 1 8 10 is_stmt 0 view .LVU8
+ARM GAS  /tmp/cc9Smu8O.s 			page 2
+
+
+  51 0016 9023     		movs	r3, #144
+  52 0018 DB05     		lsls	r3, r3, #23
+  53 001a 1A68     		ldr	r2, [r3]
+  54              		.loc 1 8 18 view .LVU9
+  55 001c 0749     		ldr	r1, .L2+4
+  56 001e 0A40     		ands	r2, r1
+  57 0020 1A60     		str	r2, [r3]
+   9:Src/dac.c     ****     GPIOA->MODER |=  (3u << (4 * 2));
+  58              		.loc 1 9 5 is_stmt 1 view .LVU10
+  59              		.loc 1 9 10 is_stmt 0 view .LVU11
+  60 0022 1968     		ldr	r1, [r3]
+  61              		.loc 1 9 18 view .LVU12
+  62 0024 C022     		movs	r2, #192
+  63 0026 9200     		lsls	r2, r2, #2
+  64 0028 0A43     		orrs	r2, r1
+  65 002a 1A60     		str	r2, [r3]
+  10:Src/dac.c     **** 
+  11:Src/dac.c     ****     DAC->CR |= DAC_CR_EN1;
+  66              		.loc 1 11 5 is_stmt 1 view .LVU13
+  67              		.loc 1 11 8 is_stmt 0 view .LVU14
+  68 002c 044A     		ldr	r2, .L2+8
+  69 002e 1368     		ldr	r3, [r2]
+  70              		.loc 1 11 13 view .LVU15
+  71 0030 0121     		movs	r1, #1
+  72 0032 0B43     		orrs	r3, r1
+  73 0034 1360     		str	r3, [r2]
+  12:Src/dac.c     **** }
+  74              		.loc 1 12 1 view .LVU16
+  75              		@ sp needed
+  76 0036 7047     		bx	lr
+  77              	.L3:
+  78              		.align	2
+  79              	.L2:
+  80 0038 00100240 		.word	1073876992
+  81 003c FFFCFFFF 		.word	-769
+  82 0040 00740040 		.word	1073771520
+  83              		.cfi_endproc
+  84              	.LFE40:
+  86              		.section	.text.dac_write,"ax",%progbits
+  87              		.align	1
+  88              		.global	dac_write
+  89              		.syntax unified
+  90              		.code	16
+  91              		.thumb_func
+  93              	dac_write:
+  94              	.LVL0:
+  95              	.LFB41:
+  13:Src/dac.c     **** 
+  14:Src/dac.c     **** void dac_write(uint16_t value)
+  15:Src/dac.c     **** {
+  96              		.loc 1 15 1 is_stmt 1 view -0
+  97              		.cfi_startproc
+  98              		@ args = 0, pretend = 0, frame = 0
+  99              		@ frame_needed = 0, uses_anonymous_args = 0
+ 100              		@ link register save eliminated.
+  16:Src/dac.c     ****     value &= 0x0FFF;
+ 101              		.loc 1 16 5 view .LVU18
+ARM GAS  /tmp/cc9Smu8O.s 			page 3
+
+
+ 102              		.loc 1 16 11 is_stmt 0 view .LVU19
+ 103 0000 0005     		lsls	r0, r0, #20
+ 104              	.LVL1:
+ 105              		.loc 1 16 11 view .LVU20
+ 106 0002 000D     		lsrs	r0, r0, #20
+ 107              	.LVL2:
+  17:Src/dac.c     ****     DAC->DHR12R1 = value;
+ 108              		.loc 1 17 5 is_stmt 1 view .LVU21
+ 109              		.loc 1 17 18 is_stmt 0 view .LVU22
+ 110 0004 014B     		ldr	r3, .L5
+ 111 0006 9860     		str	r0, [r3, #8]
+  18:Src/dac.c     **** }...
+ 112              		.loc 1 18 1 view .LVU23
+ 113              		@ sp needed
+ 114 0008 7047     		bx	lr
+ 115              	.L6:
+ 116 000a C046     		.align	2
+ 117              	.L5:
+ 118 000c 00740040 		.word	1073771520
+ 119              		.cfi_endproc
+ 120              	.LFE41:
+ 122              		.text
+ 123              	.Letext0:
+ 124              		.file 2 "/usr/lib/gcc/arm-none-eabi/13.2.1/include/stdint.h"
+ 125              		.file 3 "Drivers/CMSIS/Device/ST/STM32F0xx/Include/stm32f072xb.h"
+ARM GAS  /tmp/cc9Smu8O.s 			page 4
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 dac.c
+     /tmp/cc9Smu8O.s:19     .text.dac_init:00000000 $t
+     /tmp/cc9Smu8O.s:25     .text.dac_init:00000000 dac_init
+     /tmp/cc9Smu8O.s:80     .text.dac_init:00000038 $d
+     /tmp/cc9Smu8O.s:87     .text.dac_write:00000000 $t
+     /tmp/cc9Smu8O.s:93     .text.dac_write:00000000 dac_write
+     /tmp/cc9Smu8O.s:118    .text.dac_write:0000000c $d
+
+NO UNDEFINED SYMBOLS
