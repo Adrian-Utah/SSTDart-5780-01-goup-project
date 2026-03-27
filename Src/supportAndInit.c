@@ -76,32 +76,15 @@ void PrepRCCUART(){
 *
 */
 void PrepConfigLED(){
-    GPIOC->MODER &= ~(1 << 19);
-    GPIOC->MODER |= (1 << 18);
-    GPIOC->MODER &= ~(1 << 17);
-    GPIOC->MODER |= (1 << 16);
-    GPIOC->MODER &= ~(1 << 15);
-    GPIOC->MODER |= (1 << 14);
-    GPIOC->MODER &= ~(1 << 13);
-    GPIOC->MODER |= (1 << 12);
+    //clear then set MODER of LEDs to Output
+    GPIOC->MODER &= ~(0xFF << 12);
+    GPIOC->MODER |= (0x55 << 12);
 
-    GPIOC->OSPEEDR &= ~(1 << 12);
-    GPIOC->OSPEEDR &= ~(1 << 13);
-    GPIOC->OSPEEDR &= ~(1 << 14);
-    GPIOC->OSPEEDR &= ~(1 << 15);
-    GPIOC->OSPEEDR &= ~(1 << 16);
-    GPIOC->OSPEEDR &= ~(1 << 17);
-    GPIOC->OSPEEDR &= ~(1 << 18);
-    GPIOC->OSPEEDR &= ~(1 << 19);
+    //set to low speed
+    GPIOC->OSPEEDR &= ~(0xFF << 12);
 
-    GPIOC->PUPDR &= ~(1 << 12);
-    GPIOC->PUPDR &= ~(1 << 13);
-    GPIOC->PUPDR &= ~(1 << 14);
-    GPIOC->PUPDR &= ~(1 << 15);
-    GPIOC->PUPDR &= ~(1 << 16);
-    GPIOC->PUPDR &= ~(1 << 17);
-    GPIOC->PUPDR &= ~(1 << 18);
-    GPIOC->PUPDR &= ~(1 << 19);
+    //set to floating (no up or down)
+    GPIOC->PUPDR &= ~(0xFF << 12);
 
 }
 /* PrepConfigUART - configure UART for use.
@@ -143,7 +126,7 @@ void PrepConfigUART(){
 
 }
 
-/* writep - write a pin from target GPIO
+/* writep - write a pin from target GPIO (mostly for LEDs)
 *
 * ****WARNING NOT MANY GUARDRAILS ONLY SET WHAT YOU ARE CERTIAN YOU WANT TO SET****
 *
@@ -165,7 +148,7 @@ void writep(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin, GPIO_PinState PinState){
     }
 }
 
-/* togglep - toggle a pin from target GPIO
+/* togglep - toggle a pin from target GPIO (mostly for LEDs)
 *
 * GPIOx: whitch GPIO to target
 * GPIO_Pin: pin to toggle
