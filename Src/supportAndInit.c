@@ -22,21 +22,22 @@ all others must request authorization
 * no return
 *
 */
-void PrepRCCLED(){
-RCC->AHBENR |= RCC_AHBENR_GPIOCEN;
+void PrepRCCLED(void){
+    RCC->AHBENR |= RCC_AHBENR_GPIOCEN;
 }
 
-/* PrepRCCLED - enable LED RCC for use.
+/* PrepRCCGPIOAnC - enable GPIOA/GPIOB and SPI1 RCC for use.
 *
 * no peram
 *
 * no return
 *
 */
-void PrepRCCGPIOAnC(){
-  RCC->AHBENR |= (RCC_AHBENR_GPIOAEN | RCC_AHBENR_GPIOBEN);
-  RCC->APB2ENR |= RCC_APB2ENR_SPI1EN;
+void PrepRCCGPIOAnC(void){
+    RCC->AHBENR |= (RCC_AHBENR_GPIOAEN | RCC_AHBENR_GPIOBEN);
+    RCC->APB2ENR |= RCC_APB2ENR_SPI1EN;
 }
+
 /* PrepRCCOscillator - enable, and config Oscillator RCC for use.
 * this is a register level verson of a prev code that relied on HAL
 *
@@ -47,30 +48,30 @@ void PrepRCCGPIOAnC(){
 * no return
 *
 */
-void PrepRCCAndConfigOscillator(){
-    //Enable High Speed oscillator
-    RCC -> CR |= RCC_CR_HSION;
-    //wait for HSI
+void PrepRCCAndConfigOscillator(void){
+    // Enable High Speed oscillator
+    RCC->CR |= RCC_CR_HSION;
+
+    // wait for HSI
     while (!(RCC->CR & RCC_CR_HSIRDY));
 
+    // set calibration, clear, then set
+    RCC->CR &= ~(RCC_CR_HSITRIM);
+    RCC->CR |= (RCC_HSICALIBRATION_DEFAULT << RCC_CR_HSITRIM_BitNumber);
 
-    //set calibration, clear, then set
-    RCC -> CR &= ~(RCC_CR_HSITRIM); 
-    RCC -> CR |= RCC_HSICALIBRATION_DEFAULT << RCC_CR_HSITRIM_BitNumber;
-
-    //set flash latency to 0
+    // set flash latency to 0 wait states
     FLASH->ACR &= ~FLASH_ACR_LATENCY;
-    FLASH->ACR |= FLASH_ACR_LATENCY_0;
 
-    //set to DVI1
+    // set to DIV1
     RCC->CFGR &= ~(RCC_CFGR_HPRE | RCC_CFGR_PPRE);
 
-    //set HSI as system clock
+    // set HSI as system clock
     RCC->CFGR &= ~RCC_CFGR_SW;
 
-    //Wait for the clock switch
+    // Wait for the clock switch
     while ((RCC->CFGR & RCC_CFGR_SWS) != RCC_CFGR_SWS_HSI);
 }
+
 /* PrepRCCUART - enable UART RCC for use.
 *
 * no peram
@@ -78,27 +79,28 @@ void PrepRCCAndConfigOscillator(){
 * no return
 *
 */
-void PrepRCCUART(){
-  RCC->APB1ENR |= RCC_APB1ENR_USART3EN;
+void PrepRCCUART(void){
+    RCC->APB1ENR |= RCC_APB1ENR_USART3EN;
 }
+
 /* PrepConfigLED - prep LEDs for use
 * no peram
 *
 * no return
 *
 */
-void PrepConfigLED(){
-    //clear then set MODER of LEDs to Output
+void PrepConfigLED(void){
+    // clear then set MODER of LEDs to Output
     GPIOC->MODER &= ~(0xFF << 12);
     GPIOC->MODER |= (0x55 << 12);
 
-    //set to low speed
+    // set to low speed
     GPIOC->OSPEEDR &= ~(0xFF << 12);
 
-    //set to floating (no up or down)
+    // set to floating (no up or down)
     GPIOC->PUPDR &= ~(0xFF << 12);
-
 }
+
 /* PrepConfigUART - configure UART for use.
 *
 * no peram
@@ -106,37 +108,42 @@ void PrepConfigLED(){
 * no return
 *
 */
-void PrepConfigUART(){
-    //set MODER to alt function;
+void PrepConfigUART(void){
+    // set MODER to alt function
     GPIOC->MODER |= GPIO_MODER_MODER10_1;
     GPIOC->MODER |= GPIO_MODER_MODER11_1;
     GPIOC->MODER &= ~GPIO_MODER_MODER10_0;
     GPIOC->MODER &= ~GPIO_MODER_MODER11_0;
-    //set OTYPER to push pull (redundent to the default)
+
+    // set OTYPER to push pull
     GPIOC->OTYPER &= ~(GPIO_OTYPER_OT_10 | GPIO_OTYPER_OT_11);
-    //set OSPEEDR to low (redundent to the default)
+
+    // set OSPEEDR to low
     GPIOC->OSPEEDR &= ~(GPIO_OSPEEDR_OSPEEDR10 | GPIO_OSPEEDR_OSPEEDR11);
-    //set to No Pull-up/Pull-down (redundent to the default)
+
+    // set to No Pull-up/Pull-down
     GPIOC->PUPDR &= ~(GPIO_PUPDR_PUPDR10 | GPIO_PUPDR_PUPDR11);
-    //set Alternate Function to AF1
+
+    // set Alternate Function to AF1
     GPIOC->AFR[1] &= ~((0xF << 8) | (0xF << 12));
     GPIOC->AFR[1] |=  ((1 << 8) | (1 << 12));
 
-    //set baud rate
+    // set baud rate
     USART3->BRR = 0x45;
 
-    //Enable TX, Enable RX, and Enable RX Interrupt
+    // Enable TX, Enable RX, and Enable RX Interrupt
     USART3->CR1 |= USART_CR1_TE;
     USART3->CR1 |= USART_CR1_RE;
     USART3->CR1 |= USART_CR1_RXNEIE;
-    //enable
+
+    // enable UART
     USART3->CR1 |= USART_CR1_UE;
 
-    //NVIC Setup
+    // NVIC Setup
     NVIC->IP[29] = (1 << 6);
     NVIC->ISER[0] = (1 << 29);
-
 }
+
 /* PrepConfigSPI - configure SPI.
 *
 * no peram
@@ -144,18 +151,18 @@ void PrepConfigUART(){
 * no return
 *
 */
-void PrepConfigSPI(){
-    //Configure SPI1 Pins (PA5, PA7) to AF0
+void PrepConfigSPI(void){
+    // Configure SPI1 Pins (PA5, PA7) to AF0
     GPIOA->MODER &= ~(GPIO_MODER_MODER5 | GPIO_MODER_MODER7);
     GPIOA->MODER |= (GPIO_MODER_MODER5_1 | GPIO_MODER_MODER7_1);
     GPIOA->AFR[0] &= ~((0xF << (5 * 4)) | (0xF << (7 * 4)));
 
-    //Configure Control Pins (PB0, PB6) as Outputs
+    // Configure Control Pins (PB0, PB6) as Outputs
     GPIOB->ODR |= (1 << 0) | (1 << 6); // Set High (Idle)
     GPIOB->MODER &= ~(GPIO_MODER_MODER0 | GPIO_MODER_MODER6);
     GPIOB->MODER |= (GPIO_MODER_MODER0_0 | GPIO_MODER_MODER6_0);
 
-    //Configure SPI1 (Master, Mode 2: CPOL=1, CPHA=0)
+    // Configure SPI1 (Master, Mode 2: CPOL=1, CPHA=0)
     SPI1->CR1 = SPI_CR1_MSTR | SPI_CR1_CPOL | SPI_CR1_SSM | SPI_CR1_SSI | (0x3 << SPI_CR1_BR_Pos);
     SPI1->CR2 = (0xF << SPI_CR2_DS_Pos);
     SPI1->CR1 |= SPI_CR1_SPE;
@@ -176,9 +183,10 @@ void AD9833_Write(uint16_t data) {
     while (SPI1->SR & SPI_SR_BSY);
     GPIOB->BSRR = (1 << 0);               // FSYNC High
 }
-/* AD5227_Set_Amplitude - configure SPI.
+
+/* AD5227_Set_Amplitude - configure amplitude chip.
 *
-* taget - target V mod
+* target - target V mod
 *
 * no return
 *
@@ -186,7 +194,7 @@ void AD9833_Write(uint16_t data) {
 void AD5227_Set_Amplitude(uint8_t target) {
     if (target > 63) target = 63;
 
-    //Temporarily disable SPI to manual control pins
+    // Temporarily disable SPI to manual control pins
     SPI1->CR1 &= ~SPI_CR1_SPE;
     GPIOA->MODER &= ~(GPIO_MODER_MODER5 | GPIO_MODER_MODER7);
     GPIOA->MODER |= (GPIO_MODER_MODER5_0 | GPIO_MODER_MODER7_0); // General Purpose Output
@@ -195,27 +203,28 @@ void AD5227_Set_Amplitude(uint8_t target) {
 
     // Walk to Zero (Down)
     GPIOA->BRR = (1 << 7); // MOSI/UD Low
-    for(int i = 0; i < 64; i++) {
+    for (int i = 0; i < 64; i++) {
         GPIOA->BSRR = (1 << 5); // SCK/CLK High
-        for(volatile int d=0; d<10; d++);
+        for (volatile int d = 0; d < 10; d++);
         GPIOA->BRR = (1 << 5);  // SCK/CLK Low
     }
 
-    //Walk up to Target
+    // Walk up to Target
     GPIOA->BSRR = (1 << 7); // MOSI/UD High
-    for(int i = 0; i < target; i++) {
+    for (int i = 0; i < target; i++) {
         GPIOA->BSRR = (1 << 5); // SCK/CLK High
-        for(volatile int d=0; d<10; d++);
+        for (volatile int d = 0; d < 10; d++);
         GPIOA->BRR = (1 << 5);  // SCK/CLK Low
     }
 
     GPIOB->BSRR = (1 << 6); // CS High (Lock)
 
-    //Re-enable SPI for AD9833 use
+    // Re-enable SPI for AD9833 use
     GPIOA->MODER &= ~(GPIO_MODER_MODER5 | GPIO_MODER_MODER7);
     GPIOA->MODER |= (GPIO_MODER_MODER5_1 | GPIO_MODER_MODER7_1); // Back to AF
     SPI1->CR1 |= SPI_CR1_SPE;
 }
+
 /* writep - write a pin from target GPIO (mostly for LEDs)
 *
 * ****WARNING NOT MANY GUARDRAILS ONLY SET WHAT YOU ARE CERTIAN YOU WANT TO SET****
@@ -228,12 +237,9 @@ void AD5227_Set_Amplitude(uint8_t target) {
 *
 */
 void writep(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin, GPIO_PinState PinState){
-    // if s
-    if (PinState == GPIO_PIN_SET) { //IE 1
-        //use first half to "set" on (our use case)
+    if (PinState == GPIO_PIN_SET) {
         GPIOx->BSRR = (uint32_t)GPIO_Pin;
     } else {
-        //use second half to "reset" off (our use case)
         GPIOx->BSRR = (uint32_t)GPIO_Pin << 16U;
     }
 }
@@ -247,23 +253,16 @@ void writep(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin, GPIO_PinState PinState){
 *
 */
 void togglep(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin){
-    //use Output Data Register to get the state of the specified GPIO
     uint32_t odr = GPIOx->ODR;
-    //toggle Bit Set Reset Register of specified pin
     GPIOx->BSRR = ((odr & GPIO_Pin) << 16U) | (~odr & GPIO_Pin);
 }
 
-/* Prototype
-*
-*
-*
-*
-void Set_Frequency(uint32_t freq_hz) {
-    uint32_t freq_reg = (uint32_t)((double)freq_hz * 268435456.0 / 25000000.0);
-    
-    AD9833_Write(0x2100);                         // Control: B28, Reset
-    AD9833_Write((freq_reg & 0x3FFF) | 0x4000);   // FREQ0 LSB
-    AD9833_Write(((freq_reg >> 14) & 0x3FFF) | 0x4000); // FREQ0 MSB
-    AD9833_Write(0x2000);                         // Exit Reset, Sine Wave
+void Set_Frequency(uint32_t freq_hz)
+{
+    uint32_t freq_reg = (uint32_t)(((uint64_t)freq_hz << 28) / 2500000ULL);
+
+    AD9833_Write(0x2100);                               // B28 = 1, RESET = 1
+    AD9833_Write(0x4000 | (freq_reg & 0x3FFF));         // FREQ0 LSB 14 bits
+    AD9833_Write(0x4000 | ((freq_reg >> 14) & 0x3FFF)); // FREQ0 MSB 14 bits
+    AD9833_Write(0x2000);                               // leave reset, sine output
 }
-*/
