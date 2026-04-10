@@ -151,21 +151,23 @@ void PrepConfigUART(void){
 * no return
 *
 */
-void PrepConfigSPI(void){
-    // Configure SPI1 Pins (PA5, PA7) to AF0
-    GPIOA->MODER &= ~(GPIO_MODER_MODER5 | GPIO_MODER_MODER7);
-    GPIOA->MODER |= (GPIO_MODER_MODER5_1 | GPIO_MODER_MODER7_1);
-    GPIOA->AFR[0] &= ~((0xF << (5 * 4)) | (0xF << (7 * 4)));
+void PrepConfigSPI(void)
+{
+    // PA4 = amplitude CS output
+    // PA5 = CLK output
+    GPIOA->MODER &= ~(GPIO_MODER_MODER4 | GPIO_MODER_MODER5);
+    GPIOA->MODER |= (GPIO_MODER_MODER4_0 | GPIO_MODER_MODER5_0);
 
-    // Configure Control Pins (PB0, PB6) as Outputs
-    GPIOB->ODR |= (1 << 0) | (1 << 6); // Set High (Idle)
-    GPIOB->MODER &= ~(GPIO_MODER_MODER0 | GPIO_MODER_MODER6);
-    GPIOB->MODER |= (GPIO_MODER_MODER0_0 | GPIO_MODER_MODER6_0);
+    // PB6 = FSY output
+    // PB7 = DAT output
+    GPIOB->MODER &= ~(GPIO_MODER_MODER6 | GPIO_MODER_MODER7);
+    GPIOB->MODER |= (GPIO_MODER_MODER6_0 | GPIO_MODER_MODER7_0);
 
-    // Configure SPI1 (Master, Mode 2: CPOL=1, CPHA=0)
-    SPI1->CR1 = SPI_CR1_MSTR | SPI_CR1_CPOL | SPI_CR1_SSM | SPI_CR1_SSI | (0x3 << SPI_CR1_BR_Pos);
-    SPI1->CR2 = (0xF << SPI_CR2_DS_Pos);
-    SPI1->CR1 |= SPI_CR1_SPE;
+    // Idle states
+    GPIOA->BSRR = (1u << 4);   // amplitude CS high
+    GPIOA->BSRR = (1u << 5);   // CLK high
+    GPIOB->BRR  = (1u << 7);   // DAT low
+    GPIOB->BSRR = (1u << 6);   // FSY high
 }
 
 
@@ -176,12 +178,49 @@ void PrepConfigSPI(void){
 * no return
 *
 */
-void AD9833_Write(uint16_t data) {
-    GPIOB->BRR = (1 << 0);                // FSYNC Low
-    while (!(SPI1->SR & SPI_SR_TXE));
-    *(volatile uint16_t *)&SPI1->DR = data;
-    while (SPI1->SR & SPI_SR_BSY);
-    GPIOB->BSRR = (1 << 0);               // FSYNC High
+static void short_delay(void)
+{
+    for (volatile int i = 0; i < 20; i++) {
+        __asm__("nop");
+    }
+}
+
+void AD9833_Write(uint16_t data)
+{
+    // Assume:
+    // PA5 = CLK / SCLK
+    // PB6 = FSY / FSYNC
+    // PB7 = DAT / SDATA
+
+    // Make sure clock is high before FSYNC goes low
+    GPIOA->BSRR = (1u << 5);   // CLK high
+    GPIOB->BSRR = (1u << 6);   // FSY high
+    short_delay();
+
+    // Start frame
+    GPIOB->BRR = (1u << 6);    // FSY low
+    short_delay();
+
+    // Send 16 bits MSB first
+    for (int i = 15; i >= 0; i--) {
+        if (data & (1u << i)) {
+            GPIOB->BSRR = (1u << 7);   // DAT high
+        } else {
+            GPIOB->BRR = (1u << 7);    // DAT low
+        }
+
+        short_delay();
+
+        // Data shifts in on falling edge
+        GPIOA->BRR = (1u << 5);        // CLK low
+        short_delay();
+        GPIOA->BSRR = (1u << 5);       // CLK high
+        short_delay();
+    }
+
+    // End frame
+    GPIOB->BSRR = (1u << 6);   // FSY high
+    short_delay();
 }
 
 /* AD5227_Set_Amplitude - configure amplitude chip.
@@ -194,42 +233,44 @@ void AD9833_Write(uint16_t data) {
 void AD5227_Set_Amplitude(uint8_t target) {
     if (target > 63) target = 63;
 
-    // Temporarily disable SPI to manual control pins
-    SPI1->CR1 &= ~SPI_CR1_SPE;
-    GPIOA->MODER &= ~(GPIO_MODER_MODER5 | GPIO_MODER_MODER7);
-    GPIOA->MODER |= (GPIO_MODER_MODER5_0 | GPIO_MODER_MODER7_0); // General Purpose Output
+    // New DDS module wiring:
+    // PA4 = CS for amplitude control
+    // PA5 = CLK
+    // PB7 = DAT / U-D
+    // PB6 = FSY, keep high while changing amplitude
+    GPIOB->BSRR = (1u << 6);
 
-    GPIOB->BRR = (1 << 6); // CS Low
+    GPIOA->BRR = (1u << 4); // CS Low
 
     // Walk to Zero (Down)
-    GPIOA->BRR = (1 << 7); // MOSI/UD Low
+    GPIOB->BRR = (1u << 7); // DAT/UD Low
     for (int i = 0; i < 64; i++) {
-        GPIOA->BSRR = (1 << 5); // SCK/CLK High
+        GPIOA->BSRR = (1u << 5); // CLK High
         for (volatile int d = 0; d < 10; d++);
-        GPIOA->BRR = (1 << 5);  // SCK/CLK Low
+        GPIOA->BRR = (1u << 5);  // CLK Low
     }
 
     // Walk up to Target
-    GPIOA->BSRR = (1 << 7); // MOSI/UD High
+    GPIOB->BSRR = (1u << 7); // DAT/UD High
     for (int i = 0; i < target; i++) {
-        GPIOA->BSRR = (1 << 5); // SCK/CLK High
+        GPIOA->BSRR = (1u << 5); // CLK High
         for (volatile int d = 0; d < 10; d++);
-        GPIOA->BRR = (1 << 5);  // SCK/CLK Low
+        GPIOA->BRR = (1u << 5);  // CLK Low
     }
 
-    GPIOB->BSRR = (1 << 6); // CS High (Lock)
-
-    // Re-enable SPI for AD9833 use
-    GPIOA->MODER &= ~(GPIO_MODER_MODER5 | GPIO_MODER_MODER7);
-    GPIOA->MODER |= (GPIO_MODER_MODER5_1 | GPIO_MODER_MODER7_1); // Back to AF
-    SPI1->CR1 |= SPI_CR1_SPE;
+    GPIOA->BSRR = (1u << 4); // CS High (Lock)
+    GPIOA->BSRR = (1u << 5); // CLK idle high for AD9833
+    GPIOB->BRR = (1u << 7);  // DAT idle low
 }
 
 /* writep - write a pin from target GPIO (mostly for LEDs)
 *
 * ****WARNING NOT MANY GUARDRAILS ONLY SET WHAT YOU ARE CERTIAN YOU WANT TO SET****
 *
-* GPIOx: whitch GPIO to target
+* GPIOx: whitch GPIO to target]
+]]
+]
+
 * GPIO_Pin: pin to write
 * GPIO_PinState: state to write (on, off, Ect.)
 *
@@ -259,10 +300,11 @@ void togglep(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin){
 
 void Set_Frequency(uint32_t freq_hz)
 {
-    uint32_t freq_reg = (uint32_t)(((uint64_t)freq_hz << 28) / 2500000ULL);
+    uint32_t freq_reg = (uint32_t)(((uint64_t)freq_hz << 28) / 25000000ULL);
 
     AD9833_Write(0x2100);                               // B28 = 1, RESET = 1
     AD9833_Write(0x4000 | (freq_reg & 0x3FFF));         // FREQ0 LSB 14 bits
     AD9833_Write(0x4000 | ((freq_reg >> 14) & 0x3FFF)); // FREQ0 MSB 14 bits
     AD9833_Write(0x2000);                               // leave reset, sine output
+
 }

@@ -1,72 +1,65 @@
 #include <stdio.h>
 #include "supportAndInit.h"
 #include "main.h"
-#include "dac.h"
 
-#define LED_PIN         8u
-#define SWEEP_START_HZ  1000u
-#define SWEEP_END_HZ    100000u
-#define SWEEP_STEPS     64u
+/*
+DDS wiring for the current known-good setup:
+PA5  -> DDS CLK
+PB7  -> DDS DAT
+PB6  -> DDS FSY
+PA4  -> DDS CS (amplitude control, optional)
+3V3  -> DDS VCC
+GND  -> DDS GND
 
-// --- LED ---
+Note for Adrian:
+- Drive the DDS with Set_Frequency(freq_hz).
+- Press the user button to run the sweep from 5 MHz to 10 MHz.
+- During the sweep, UART3 prints "frequency magnitude" lines with fake magnitude
+  values as placeholders for the radio-side processing path.
+- If amplitude control causes trouble on a bench setup, comment out
+  AD5227_Set_Amplitude(63u) below and leave DDS CS disconnected.
+*/
 
-static void green_led_init(void)
+#define LED_PIN 7u
+#define USER_BUTTON_PIN 0u
+#define SWEEP_START_HZ 5000000u
+#define SWEEP_END_HZ 10000000u
+#define SWEEP_STEPS 64u
+#define SWEEP_DELAY_MS 500u
+
+UART_HandleTypeDef huart3;
+
+volatile uint8_t rx_data = 0;
+volatile uint8_t rx_flag = 0;
+
+static void led_init(void)
 {
     RCC->AHBENR |= RCC_AHBENR_GPIOCEN;
     GPIOC->MODER &= ~(3u << (LED_PIN * 2));
     GPIOC->MODER |=  (1u << (LED_PIN * 2));
 }
 
-static void green_led_on(void)
+static void led_on(void)
 {
     GPIOC->BSRR = (1u << LED_PIN);
 }
 
-static void green_led_off(void)
+static void led_off(void)
 {
     GPIOC->BSRR = (1u << (LED_PIN + 16u));
 }
 
-static void delay_loop(volatile uint32_t t)
+static void button_init(void)
 {
-    while (t--) {
-        __asm__("nop");
-    }
+    RCC->AHBENR |= RCC_AHBENR_GPIOAEN;
+    GPIOA->MODER &= ~(3u << (USER_BUTTON_PIN * 2u));
+    GPIOA->PUPDR &= ~(3u << (USER_BUTTON_PIN * 2u));
 }
 
-// --- Clock ---
-
-void SystemClock_Config(void)
+static uint8_t button_is_pressed(void)
 {
-    RCC_OscInitTypeDef oscillator = {0};
-    oscillator.OscillatorType      = RCC_OSCILLATORTYPE_HSI;
-    oscillator.HSIState            = RCC_HSI_ON;
-    oscillator.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
-    oscillator.PLL.PLLState        = RCC_PLL_NONE;
-
-    if (HAL_RCC_OscConfig(&oscillator) != HAL_OK) {
-        while (1) {
-        }
-    }
-
-    RCC_ClkInitTypeDef clock = {0};
-    clock.ClockType      = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1;
-    clock.SYSCLKSource   = RCC_SYSCLKSOURCE_HSI;
-    clock.AHBCLKDivider  = RCC_SYSCLK_DIV1;
-    clock.APB1CLKDivider = RCC_HCLK_DIV1;
-
-    if (HAL_RCC_ClockConfig(&clock, FLASH_LATENCY_0) != HAL_OK) {
-        while (1) {
-        }
-    }
+    return (GPIOA->IDR & (1u << USER_BUTTON_PIN)) != 0u;
 }
-
-// --- UART ---
-
-UART_HandleTypeDef huart3;
-
-volatile uint8_t rx_data = 0;
-volatile uint8_t rx_flag = 0;
 
 static void usart3_init(void)
 {
@@ -96,14 +89,6 @@ static void usart3_init(void)
     HAL_NVIC_EnableIRQ(USART3_4_IRQn);
 }
 
-static char receive_char(void)
-{
-    while (!rx_flag) {
-    }
-    rx_flag = 0;
-    return (char)rx_data;
-}
-
 static void transmit_char(char c)
 {
     while (!(USART3->ISR & USART_ISR_TXE)) {
@@ -118,71 +103,97 @@ static void transmit_string(const char *str)
     }
 }
 
-static void transmit_measurement(uint32_t freq, uint32_t mag)
+static void transmit_measurement(uint32_t freq_hz, uint32_t magnitude)
 {
     char buf[32];
-    snprintf(buf, sizeof(buf), "%lu %lu\r\n", (unsigned long)freq, (unsigned long)mag);
+    snprintf(buf, sizeof(buf), "%lu %lu\r\n",
+        (unsigned long)freq_hz,
+        (unsigned long)magnitude);
     transmit_string(buf);
 }
 
-// --- Sweep ---
-
-static void sweep(void)
+void SystemClock_Config(void)
 {
-    uint32_t step = (SWEEP_END_HZ - SWEEP_START_HZ) / (SWEEP_STEPS - 1u);
+    RCC_OscInitTypeDef oscillator = {0};
+    oscillator.OscillatorType      = RCC_OSCILLATORTYPE_HSI;
+    oscillator.HSIState            = RCC_HSI_ON;
+    oscillator.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+    oscillator.PLL.PLLState        = RCC_PLL_NONE;
 
-    for (uint32_t i = 0; i < SWEEP_STEPS; i++) {
-        uint32_t freq = SWEEP_START_HZ + i * step;
-        uint32_t mag  = i * (4095u / (SWEEP_STEPS - 1u));
+    if (HAL_RCC_OscConfig(&oscillator) != HAL_OK) {
+        while (1) {
+        }
+    }
 
-        Set_Frequency(freq);
-        delay_loop(50000);
+    RCC_ClkInitTypeDef clock = {0};
+    clock.ClockType      = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1;
+    clock.SYSCLKSource   = RCC_SYSCLKSOURCE_HSI;
+    clock.AHBCLKDivider  = RCC_SYSCLK_DIV1;
+    clock.APB1CLKDivider = RCC_HCLK_DIV1;
 
-        transmit_measurement(freq, mag);
+    if (HAL_RCC_ClockConfig(&clock, FLASH_LATENCY_0) != HAL_OK) {
+        while (1) {
+        }
+    }
+}
+
+static void run_sweep(void)
+{
+    uint32_t step_hz = (SWEEP_END_HZ - SWEEP_START_HZ) / (SWEEP_STEPS - 1u);
+
+    led_on();
+
+    for (uint32_t i = 0u; i < SWEEP_STEPS; i++) {
+        uint32_t freq_hz = SWEEP_START_HZ + (i * step_hz);
+        uint32_t magnitude = i * (4095u / (SWEEP_STEPS - 1u));
+
+        if (i == (SWEEP_STEPS - 1u)) {
+            freq_hz = SWEEP_END_HZ;
+            magnitude = 4095u;
+        }
+
+        Set_Frequency(freq_hz);
+        transmit_measurement(freq_hz, magnitude);
+        HAL_Delay(SWEEP_DELAY_MS);
     }
 
     transmit_string("END\r\n");
+    led_off();
 }
-
-// --- Main ---
 
 int main(void)
 {
+    uint8_t was_pressed = 0u;
+
     HAL_Init();
     SystemClock_Config();
 
-    green_led_init();
-    dac_init();
+    led_init();
+    button_init();
     usart3_init();
-
     PrepRCCGPIOAnC();
     PrepConfigSPI();
 
-    green_led_off();
-    delay_loop(300000);
-    green_led_on();
-    delay_loop(300000);
-    green_led_off();
-    delay_loop(300000);
-    green_led_on();
-    delay_loop(300000);
-    green_led_off();
-    delay_loop(300000);
-
-    AD5227_Set_Amplitude(63);
-    Set_Frequency(1000000);
-
-    green_led_on();
+    AD5227_Set_Amplitude(63u);
+    Set_Frequency(SWEEP_START_HZ);
+    led_off();
 
     while (1) {
-        switch (receive_char()) {
-            case 's':
-                sweep();
-                break;
+        uint8_t pressed = button_is_pressed();
 
-            default:
-                transmit_string("Error: unknown command\r\n");
-                break;
+        if (pressed && !was_pressed) {
+            HAL_Delay(40);
+
+            if (button_is_pressed()) {
+                run_sweep();
+
+                while (button_is_pressed()) {
+                    HAL_Delay(10);
+                }
+            }
         }
+
+        was_pressed = pressed;
+        HAL_Delay(10);
     }
 }

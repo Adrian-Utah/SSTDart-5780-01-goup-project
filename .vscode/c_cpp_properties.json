@@ -1,0 +1,112 @@
+//
+// !!! WARNING !!! AUTO-GENERATED FILE!
+// PLEASE DO NOT MODIFY IT AND USE "platformio.ini":
+// https://docs.platformio.org/page/projectconf/section_env_build.html#build-flags
+//
+{
+    "configurations": [
+        {
+            "name": "PlatformIO",
+            "includePath": [
+                "C:/Users/hotdo/OneDrive/Desktop/ECE/5780_project/SSTDart-5780-01-goup-project/Src",
+                "C:/Users/hotdo/OneDrive/Desktop/ECE/5780_project/SSTDart-5780-01-goup-project/Inc",
+                "C:/Users/hotdo/OneDrive/Desktop/ECE/5780_project/SSTDart-5780-01-goup-project/Drivers/CMSIS/Include",
+                "C:/Users/hotdo/OneDrive/Desktop/ECE/5780_project/SSTDart-5780-01-goup-project/Drivers/CMSIS/Device/ST/STM32F0xx/Include",
+                "C:/Users/hotdo/OneDrive/Desktop/ECE/5780_project/SSTDart-5780-01-goup-project/Drivers/STM32F0xx_HAL_Driver/Inc",
+                "C:/Users/hotdo/OneDrive/Desktop/ECE/5780_project/SSTDart-5780-01-goup-project/Drivers/STM32F0xx_HAL_Driver/Inc/Legacy",
+                "C:/Users/hotdo/OneDrive/Desktop/ECE/5780_project/SSTDart-5780-01-goup-project/Drivers/BSP/STM32F072B-Discovery",
+                "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Drivers/CMSIS/Include",
+                "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Drivers/CMSIS/Device/ST/STM32F0xx/Include",
+                "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Drivers/STM32F0xx_HAL_Driver/Inc",
+                "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Drivers/STM32F0xx_HAL_Driver/Src",
+                "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Drivers/CMSIS/DSP/Include",
+                "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Drivers/BSP/Components/Common",
+                "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Drivers/BSP/Components/hx8347d",
+                "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Drivers/BSP/Components/i3g4250d",
+                "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Drivers/BSP/Components/l3gd20",
+                "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Drivers/BSP/Components/spfd5408",
+                "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Drivers/BSP/Components/st7735",
+                "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Drivers/BSP/Components/stlm75",
+                "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Drivers/BSP/Adafruit_Shield",
+                "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Utilities/CPU",
+                "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Utilities/Fonts",
+                "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Utilities/Log",
+                "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Core/Inc",
+                "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Core/Src",
+                "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Class/AUDIO/Inc",
+                "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Class/AUDIO/Src",
+                "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc",
+                "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src",
+                "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Class/CustomHID/Inc",
+                "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Class/CustomHID/Src",
+                "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Class/DFU/Inc",
+                "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Class/DFU/Src",
+                "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Class/HID/Inc",
+                "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Class/HID/Src",
+                "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Class/MSC/Inc",
+                "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Class/MSC/Src",
+                ""
+            ],
+            "browse": {
+                "limitSymbolsToIncludedHeaders": true,
+                "path": [
+                    "C:/Users/hotdo/OneDrive/Desktop/ECE/5780_project/SSTDart-5780-01-goup-project/Src",
+                    "C:/Users/hotdo/OneDrive/Desktop/ECE/5780_project/SSTDart-5780-01-goup-project/Inc",
+                    "C:/Users/hotdo/OneDrive/Desktop/ECE/5780_project/SSTDart-5780-01-goup-project/Drivers/CMSIS/Include",
+                    "C:/Users/hotdo/OneDrive/Desktop/ECE/5780_project/SSTDart-5780-01-goup-project/Drivers/CMSIS/Device/ST/STM32F0xx/Include",
+                    "C:/Users/hotdo/OneDrive/Desktop/ECE/5780_project/SSTDart-5780-01-goup-project/Drivers/STM32F0xx_HAL_Driver/Inc",
+                    "C:/Users/hotdo/OneDrive/Desktop/ECE/5780_project/SSTDart-5780-01-goup-project/Drivers/STM32F0xx_HAL_Driver/Inc/Legacy",
+                    "C:/Users/hotdo/OneDrive/Desktop/ECE/5780_project/SSTDart-5780-01-goup-project/Drivers/BSP/STM32F072B-Discovery",
+                    "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Drivers/CMSIS/Include",
+                    "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Drivers/CMSIS/Device/ST/STM32F0xx/Include",
+                    "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Drivers/STM32F0xx_HAL_Driver/Inc",
+                    "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Drivers/STM32F0xx_HAL_Driver/Src",
+                    "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Drivers/CMSIS/DSP/Include",
+                    "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Drivers/BSP/Components/Common",
+                    "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Drivers/BSP/Components/hx8347d",
+                    "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Drivers/BSP/Components/i3g4250d",
+                    "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Drivers/BSP/Components/l3gd20",
+                    "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Drivers/BSP/Components/spfd5408",
+                    "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Drivers/BSP/Components/st7735",
+                    "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Drivers/BSP/Components/stlm75",
+                    "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Drivers/BSP/Adafruit_Shield",
+                    "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Utilities/CPU",
+                    "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Utilities/Fonts",
+                    "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Utilities/Log",
+                    "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Core/Inc",
+                    "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Core/Src",
+                    "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Class/AUDIO/Inc",
+                    "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Class/AUDIO/Src",
+                    "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc",
+                    "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src",
+                    "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Class/CustomHID/Inc",
+                    "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Class/CustomHID/Src",
+                    "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Class/DFU/Inc",
+                    "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Class/DFU/Src",
+                    "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Class/HID/Inc",
+                    "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Class/HID/Src",
+                    "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Class/MSC/Inc",
+                    "C:/Users/hotdo/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Class/MSC/Src",
+                    ""
+                ]
+            },
+            "defines": [
+                "PLATFORMIO=60119",
+                "STM32F0",
+                "STM32F072xB",
+                "STM32F072xB",
+                "USE_HAL_DRIVER",
+                "USE_HAL_DRIVER",
+                "F_CPU=48000000L",
+                ""
+            ],
+            "compilerPath": "C:/Users/hotdo/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-gcc.exe",
+            "compilerArgs": [
+                "-mthumb",
+                "-mcpu=cortex-m0",
+                ""
+            ]
+        }
+    ],
+    "version": 4
+}
