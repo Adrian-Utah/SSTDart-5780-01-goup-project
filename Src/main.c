@@ -18,7 +18,26 @@ Note for Adrian:
   values as placeholders for the radio-side processing path.
 - If amplitude control causes trouble on a bench setup, comment out
   AD5227_Set_Amplitude(63u) below and leave DDS CS disconnected.
+
+
+Note by Adrian: 
+commented out sweep for OOK tests.
+
+pins for click:
+
+FSN -> PB6
+CS -> PA4
+SCK -> PA5
+SDI -> PB7
+OEN -> PC0
+3V3 -> 3V
+GND -> GND
+
+
+
 */
+
+
 
 #define LED_PIN 7u
 #define USER_BUTTON_PIN 0u
@@ -166,24 +185,32 @@ int main(void)
     uint8_t was_pressed = 0u;
 
     HAL_Init();
-    SystemClock_Config();
-
+    //SystemClock_Config();
+    PrepRCCAndConfigOscillator();
+    PrepRCCGPIOAnB();
+    PrepRCCLED();
     led_init();
     button_init();
     usart3_init();
-    PrepRCCGPIOAnC();
     PrepConfigSPI();
+    //PrepConfigOEN();
 
-    AD5227_Set_Amplitude(63u);
-    Set_Frequency(SWEEP_START_HZ);
-    led_off();
+    AD5227_Set_Amplitude(40u); //NOTE: SET to 40u for OOK if not potental pin fry.
+    //Set_Frequency(SWEEP_START_HZ);
+    led_on();
+    Set_Frequency(800000u);
 
     while (1) {
-        uint8_t pressed = button_is_pressed();
+        //uint8_t pressed = button_is_pressed();
 
+        //set_delay(2);
+        DDSSendCharOOK('E',1);
+
+        /*
         if (pressed && !was_pressed) {
-            HAL_Delay(40);
-
+            // HAL_Delay(40);
+            
+            
             if (button_is_pressed()) {
                 run_sweep();
 
@@ -191,9 +218,12 @@ int main(void)
                     HAL_Delay(10);
                 }
             }
+                
         }
+        
 
         was_pressed = pressed;
         HAL_Delay(10);
+        */
     }
 }

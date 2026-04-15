@@ -26,14 +26,14 @@ void PrepRCCLED(void){
     RCC->AHBENR |= RCC_AHBENR_GPIOCEN;
 }
 
-/* PrepRCCGPIOAnC - enable GPIOA/GPIOB and SPI1 RCC for use.
+/* PrepRCCGPIOAnB - enable GPIOA/GPIOB and SPI1 RCC for use.
 *
 * no peram
 *
 * no return
 *
 */
-void PrepRCCGPIOAnC(void){
+void PrepRCCGPIOAnB(void){
     RCC->AHBENR |= (RCC_AHBENR_GPIOAEN | RCC_AHBENR_GPIOBEN);
     RCC->APB2ENR |= RCC_APB2ENR_SPI1EN;
 }
@@ -170,6 +170,47 @@ void PrepConfigSPI(void)
     GPIOB->BSRR = (1u << 6);   // FSY high
 }
 
+/* PrepConfigSPI - configure OEN PIN -PC0.
+*
+* no peram
+*
+* no return
+*
+*/
+void PrepConfigOEN() {
+    // Set PC0 to Output
+    GPIOC->MODER &= ~GPIO_MODER_MODER0;
+    GPIOC->MODER |= GPIO_MODER_MODER0_0;
+    
+    // Start with output OFF (Low)
+    GPIOC->BRR = (1u << 0); 
+}
+
+/* short_delay - delay for short time.
+*
+* no peram
+*
+* no return
+*
+*/
+void short_delay(){
+    for (volatile int i = 0; i < 20; i++) {
+        __asm__("nop");
+    }
+}
+
+/* short_delay - delay for short time.
+*
+* time - time to delay for
+*
+* no return
+*
+*/
+void set_delay(uint32_t time){
+    for(volatile int i = 0; i > time;){
+        short_delay();
+    }
+}
 
 /* AD9833_Write - writ to dds.
 *
@@ -178,12 +219,6 @@ void PrepConfigSPI(void)
 * no return
 *
 */
-static void short_delay(void)
-{
-    for (volatile int i = 0; i < 20; i++) {
-        __asm__("nop");
-    }
-}
 
 void AD9833_Write(uint16_t data)
 {
@@ -298,6 +333,9 @@ void togglep(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin){
     GPIOx->BSRR = ((odr & GPIO_Pin) << 16U) | (~odr & GPIO_Pin);
 }
 
+
+
+
 void Set_Frequency(uint32_t freq_hz)
 {
     uint32_t freq_reg = (uint32_t)(((uint64_t)freq_hz << 28) / 25000000ULL);
@@ -307,4 +345,52 @@ void Set_Frequency(uint32_t freq_hz)
     AD9833_Write(0x4000 | ((freq_reg >> 14) & 0x3FFF)); // FREQ0 MSB 14 bits
     AD9833_Write(0x2000);                               // leave reset, sine output
 
+}
+
+/* DDSOutOn - turn DDS on for OOK
+*
+* no peram
+*
+* no return
+*
+*/
+void DDSOutOn(){
+    AD9833_Write(0x2000);
+    //GPIOC->BSRR = (1u << 0);
+}
+
+/* DDSOutOff - turn DDS off for OOK
+*
+* no peram
+*
+* no return
+*
+*/
+void DDSOutOff(){
+    //GPIOC->BRR = (1u << 0);
+    AD9833_Write(0x2100);
+}
+
+/* DDSSendCharOOK - send char over
+*
+* data: char to send
+* period: length of the period to use
+*
+* no return
+*
+*/
+void DDSSendCharOOK(uint8_t data, uint16_t period){
+    //send char as an OOK MSB first
+    for(int i = 7; i>= 0; i--){
+        if(data & (1<<i)){
+            DDSOutOn();
+        }
+        else{
+            DDSOutOff();
+        }
+        set_delay(period*8000);
+    }
+   
+
+    
 }
