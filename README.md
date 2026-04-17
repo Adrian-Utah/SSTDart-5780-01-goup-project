@@ -30,16 +30,26 @@ Current DDS wiring used for the working bench setup:
 Current firmware behavior:
 
 - the DDS is responding to `Set_Frequency(...)`
-- the user button starts a sweep from `5 MHz` to `10 MHz`
-- the sweep uses `64` points with `0.5 s` dwell per point
-- UART3 sends `frequency magnitude` lines during the sweep
-- the magnitude values are currently fake placeholder data for integration work
+- `ACTIVE_SYSTEM_STATE` in [Src/main.c](/C:/Users/hotdo/OneDrive/Desktop/ECE/5780_project/SSTDart-5780-01-goup-project/Src/main.c) selects among the three top-level firmware modes described below
+- reflectometry sweep capture uses `100` points from `0 Hz` to `12 MHz` with `0.37 s` dwell per point
+- UART3 sends `frequency magnitude` lines during sweeps
+- the magnitude values come from averaged ADC readings on `PA1`
+
+Firmware mode selection:
+
+- `SYSTEM_STATE_CAPTURE_SWEEPS` captures four reflectometry sweeps in this order: `OPEN`, `SHORT`, `MATCH`, `ANTENNA`
+- `SYSTEM_STATE_CHECK_THEN_TRANSMIT` runs one antenna-health sweep, compares the measured curve against the built-in expected antenna curve with a `5%` tolerance band, and only unlocks the transmit path if the sweep passes
+- `SYSTEM_STATE_BYPASS_TO_TRANSMIT` skips the antenna-health check and immediately allows the team transmit path to run
+- change `ACTIVE_SYSTEM_STATE` near the top of `Src/main.c` to switch modes, then rebuild and flash
+- to bypass the antenna check for transmitter-only testing, set `ACTIVE_SYSTEM_STATE` to `SYSTEM_STATE_BYPASS_TO_TRANSMIT`
 
 Note for Adrian:
 
 - use `Set_Frequency(freq_hz)` to drive the DDS directly for radio-side testing
-- if you want the existing sweep, press the user button on the STM32 board
-- UART output is there now so the radio/host side can consume the same frequency-tagged stream while real measurement hardware is still being integrated
+- if you want the sweep capture session, set `ACTIVE_SYSTEM_STATE` to `SYSTEM_STATE_CAPTURE_SWEEPS`
+- if you want the guarded transmit test, set `ACTIVE_SYSTEM_STATE` to `SYSTEM_STATE_CHECK_THEN_TRANSMIT`
+- if you want to bypass reflectometry hardware and let the transmit code run immediately, set `ACTIVE_SYSTEM_STATE` to `SYSTEM_STATE_BYPASS_TO_TRANSMIT`
+- UART output is there now so the radio/host side can consume the same frequency-tagged stream during reflectometry testing
 
 Bench note from 4/10/26:
 
