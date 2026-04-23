@@ -72,6 +72,9 @@ void application_tx_run(void)
 
             HAL_Delay(OOK_PATTERN_SYMBOL_MS);
         }
+
+        dds_output_off();
+        HAL_Delay(OOK_PATTERN_GAP_MS);
     }
 #else
     reflectometry_run_guarded_transmit(1u);

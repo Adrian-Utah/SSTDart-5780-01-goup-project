@@ -13,13 +13,13 @@
 static ADC_HandleTypeDef hadc;
 static uint16_t rx_test_adc_read_once(void);
 
-static uint16_t rx_test_measure_span(void)
+static uint16_t rx_test_measure_span_for_ms(uint32_t duration_ms)
 {
     uint16_t min_value = 0x0FFFu;
     uint16_t max_value = 0u;
     uint32_t start_tick = HAL_GetTick();
 
-    while ((HAL_GetTick() - start_tick) < OOK_PATTERN_SYMBOL_MS) {
+    while ((HAL_GetTick() - start_tick) < duration_ms) {
         uint16_t sample = rx_test_adc_read_once();
 
         if (sample < min_value) {
@@ -31,6 +31,40 @@ static uint16_t rx_test_measure_span(void)
     }
 
     return (uint16_t)(max_value - min_value);
+}
+
+static void rx_wait_for_pattern_start(void)
+{
+    uint32_t idle_start_tick = 0u;
+
+    uart_write_string("Waiting for long carrier-off gap.\r\n");
+
+    while (1) {
+        uint16_t span = rx_test_measure_span_for_ms(RX_SYNC_POLL_MS);
+
+        if (span < RX_TEST_SPAN_THRESHOLD_COUNTS) {
+            if (idle_start_tick == 0u) {
+                idle_start_tick = HAL_GetTick();
+            }
+
+            if ((HAL_GetTick() - idle_start_tick) >= RX_SYNC_IDLE_MS) {
+                break;
+            }
+        } else {
+            idle_start_tick = 0u;
+        }
+    }
+
+    uart_write_string("Gap detected. Waiting for carrier start.\r\n");
+
+    while (1) {
+        uint16_t span = rx_test_measure_span_for_ms(RX_SYNC_POLL_MS);
+
+        if (span >= RX_TEST_SPAN_THRESHOLD_COUNTS) {
+            uart_write_string("Carrier start detected. Sampling byte.\r\n");
+            return;
+        }
+    }
 }
 
 static void rx_wait_for_confirmation(void)
@@ -103,32 +137,37 @@ void application_rx_init(void)
     rx_test_adc_init();
     uart_write_string("PROGRAM STARTED\r\n");
     uart_write_string("MODE: RX APPLICATION\r\n");
-    uart_write_string("Sampling PA1 and reporting one detected bit per symbol window.\r\n");
+    uart_write_string("Waiting for a gap, then center-sampling 8 OOK bits on PA1.\r\n");
     rx_wait_for_confirmation();
 }
 
 void application_rx_run(void)
 {
-    uint8_t bit_index = 0u;
-    char bit_buffer[10];
+    char bit_buffer[9];
 
     while (1) {
-        uint16_t span = rx_test_measure_span();
-        uint8_t carrier_present = (span >= RX_TEST_SPAN_THRESHOLD_COUNTS) ? 1u : 0u;
+        rx_wait_for_pattern_start();
+        HAL_Delay(OOK_PATTERN_SYMBOL_MS / 2u);
 
-        if (carrier_present != 0u) {
-            board_led_on();
-        } else {
-            board_led_off();
-        }
+        for (uint32_t bit_index = 0u; bit_index < 8u; bit_index++) {
+            uint16_t span = rx_test_measure_span_for_ms(RX_CENTER_SAMPLE_MS);
+            uint8_t carrier_present = (span >= RX_TEST_SPAN_THRESHOLD_COUNTS) ? 1u : 0u;
 
-        bit_buffer[bit_index++] = carrier_present != 0u ? '1' : '0';
-        if (bit_index == 8u) {
-            for (uint32_t i = 0u; i < 8u; i++) {
-                uart_write_char(bit_buffer[i]);
+            if (carrier_present != 0u) {
+                board_led_on();
+            } else {
+                board_led_off();
             }
-            uart_write_string("\r\n");
-            bit_index = 0u;
+
+            bit_buffer[bit_index] = carrier_present != 0u ? '1' : '0';
+
+            if (bit_index != 7u) {
+                HAL_Delay(OOK_PATTERN_SYMBOL_MS - RX_CENTER_SAMPLE_MS);
+            }
         }
+
+        bit_buffer[8] = '\0';
+        uart_write_string(bit_buffer);
+        uart_write_string("\r\n");
     }
 }
