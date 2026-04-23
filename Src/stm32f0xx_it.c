@@ -18,6 +18,7 @@
   ******************************************************************************
   */
 #include "main.h"
+#include "uart.h"
 #include <stm32f0xx_hal.h>
 #include <stm32f0xx_it.h>
 
@@ -87,11 +88,7 @@ void SysTick_Handler(void)
   * @param  None
   * @retval None
   */
-extern volatile uint8_t rx_data;
-extern volatile uint8_t rx_flag;
-
 void USART3_4_IRQHandler(void)
 {
-    rx_data = USART3->RDR;
-    rx_flag = 1;
+    uart_irq_handler();
 }
