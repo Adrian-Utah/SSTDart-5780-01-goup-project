@@ -15,6 +15,8 @@ ST_FLASH = st-flash
 ######################################
 DEBUG = 1
 OPT = -Og
+APP_ROLE ?= APPLICATION_ROLE_TX
+TX_MODE ?= TX_MODE_UART_HEARTBEAT
 
 ######################################
 # paths
@@ -66,7 +68,9 @@ AS_INCLUDES =
 
 C_DEFS = \
 -DUSE_HAL_DRIVER \
--DSTM32F072xB
+-DSTM32F072xB \
+-DACTIVE_APPLICATION_ROLE=$(APP_ROLE) \
+-DACTIVE_TX_MODE=$(TX_MODE)
 
 C_INCLUDES = \
 -IInc \
