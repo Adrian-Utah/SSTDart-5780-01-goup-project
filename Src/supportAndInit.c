@@ -207,8 +207,8 @@ void short_delay(){
 *
 */
 void set_delay(uint32_t time){
-    for(volatile int i = 0; i > time;){
-        short_delay();
+    for(volatile int i = 0; i < time; i++){
+        __asm__("nop");
     }
 }
 
@@ -388,7 +388,7 @@ void DDSSendCharOOK(uint8_t data, uint16_t period){
         else{
             DDSOutOff();
         }
-        set_delay(period*8000);
+        set_delay(period);
     }
    
 
