@@ -2,7 +2,6 @@
 
 #include "app_config.h"
 #include "dds.h"
-#include "ook.h"
 #include "reflectometry.h"
 #include "stm32f0xx_hal.h"
 #include "uart.h"
@@ -64,7 +63,15 @@ void application_tx_run(void)
     }
 #elif ACTIVE_TX_MODE == TX_MODE_PATTERN_TEST
     while (1) {
-        ook_send_byte(OOK_PATTERN_TEST_BYTE, OOK_PATTERN_SYMBOL_MS * 8000u);
+        for (int bit_index = 7; bit_index >= 0; bit_index--) {
+            if (((OOK_PATTERN_TEST_BYTE >> bit_index) & 0x1u) != 0u) {
+                dds_output_on();
+            } else {
+                dds_output_off();
+            }
+
+            HAL_Delay(OOK_PATTERN_SYMBOL_MS);
+        }
     }
 #else
     reflectometry_run_guarded_transmit(1u);
