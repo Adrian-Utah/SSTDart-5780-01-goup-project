@@ -1,10 +1,8 @@
 #include "uart.h"
 
-#include "stm32f0xx_hal.h"
+#include <stm32f072xb.h>
 
 #define UART_RX_BUFFER_SIZE 128u
-
-UART_HandleTypeDef huart3;
 
 static volatile uint8_t uart_rx_buffer[UART_RX_BUFFER_SIZE];
 static volatile uint16_t uart_rx_head = 0u;
@@ -12,31 +10,37 @@ static volatile uint16_t uart_rx_tail = 0u;
 
 void uart_init(void)
 {
-    __HAL_RCC_GPIOC_CLK_ENABLE();
-    __HAL_RCC_USART3_CLK_ENABLE();
+    RCC->AHBENR |= RCC_AHBENR_GPIOCEN;
+    RCC->APB1ENR |= RCC_APB1ENR_USART3EN;
 
-    GPIO_InitTypeDef gpio = {0};
+    GPIOC->MODER |= GPIO_MODER_MODER10_1;
+    GPIOC->MODER |= GPIO_MODER_MODER11_1;
+    GPIOC->MODER &= ~GPIO_MODER_MODER10_0;
+    GPIOC->MODER &= ~GPIO_MODER_MODER11_0;
 
-    gpio.Pin = GPIO_PIN_10 | GPIO_PIN_11;
-    gpio.Mode = GPIO_MODE_AF_PP;
-    gpio.Pull = GPIO_NOPULL;
-    gpio.Speed = GPIO_SPEED_FREQ_LOW;
-    gpio.Alternate = GPIO_AF1_USART3;
-    HAL_GPIO_Init(GPIOC, &gpio);
+    // set OTYPER to push pull
+    GPIOC->OTYPER &= ~(GPIO_OTYPER_OT_10 | GPIO_OTYPER_OT_11);
+    // set OSPEEDR to low
+    GPIOC->OSPEEDR &= ~(GPIO_OSPEEDR_OSPEEDR10 | GPIO_OSPEEDR_OSPEEDR11);
+    // set to No Pull-up/Pull-down
+    GPIOC->PUPDR &= ~(GPIO_PUPDR_PUPDR10 | GPIO_PUPDR_PUPDR11);
 
-    huart3.Instance = USART3;
-    huart3.Init.BaudRate = 115200;
-    huart3.Init.WordLength = UART_WORDLENGTH_8B;
-    huart3.Init.StopBits = UART_STOPBITS_1;
-    huart3.Init.Parity = UART_PARITY_NONE;
-    huart3.Init.Mode = UART_MODE_TX_RX;
-    huart3.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-    huart3.Init.OverSampling = UART_OVERSAMPLING_16;
-    HAL_UART_Init(&huart3);
+    // set Alternate Function to AF1
+    GPIOC->AFR[1] &= ~((0xFu << 8) | (0xFu << 12));
+    GPIOC->AFR[1] |= ((1u << 8) | (1u << 12));
 
+    // set baud rate
+    USART3->BRR = 0x45;
+    // Enable TX, Enable RX, and Enable RX Interrupt
+    USART3->CR1 |= USART_CR1_TE;
+    USART3->CR1 |= USART_CR1_RE;
     USART3->CR1 |= USART_CR1_RXNEIE;
-    HAL_NVIC_SetPriority(USART3_4_IRQn, 1, 0);
-    HAL_NVIC_EnableIRQ(USART3_4_IRQn);
+    // enable UART
+    USART3->CR1 |= USART_CR1_UE;
+
+    // NVIC Setup
+    NVIC->IP[29] = (1u << 6);
+    NVIC->ISER[0] = (1u << 29);
 }
 
 void uart_write_char(char c)
