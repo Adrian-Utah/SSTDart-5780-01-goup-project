@@ -11,6 +11,26 @@
 #define RX_TEST_ADC_INPUT_CHANNEL ADC_CHANNEL_1
 
 static ADC_HandleTypeDef hadc;
+static uint16_t rx_test_adc_read_once(void);
+
+static uint16_t rx_test_measure_span(void)
+{
+    uint16_t min_value = 0x0FFFu;
+    uint16_t max_value = 0u;
+
+    for (uint32_t i = 0u; i < RX_TEST_ADC_SAMPLES_PER_WINDOW; i++) {
+        uint16_t sample = rx_test_adc_read_once();
+
+        if (sample < min_value) {
+            min_value = sample;
+        }
+        if (sample > max_value) {
+            max_value = sample;
+        }
+    }
+
+    return (uint16_t)(max_value - min_value);
+}
 
 static void rx_wait_for_confirmation(void)
 {
@@ -82,29 +102,17 @@ void application_rx_init(void)
     rx_test_adc_init();
     uart_write_string("PROGRAM STARTED\r\n");
     uart_write_string("MODE: RX APPLICATION\r\n");
-    uart_write_string("Sampling PA1 and reporting ADC min/max/span.\r\n");
+    uart_write_string("Sampling PA1 and reporting one detected bit per symbol window.\r\n");
     rx_wait_for_confirmation();
 }
 
 void application_rx_run(void)
 {
+    uint8_t bit_index = 0u;
+    char bit_buffer[10];
+
     while (1) {
-        uint16_t min_value = 0x0FFFu;
-        uint16_t max_value = 0u;
-        char buffer[96];
-
-        for (uint32_t i = 0u; i < RX_TEST_ADC_SAMPLES_PER_WINDOW; i++) {
-            uint16_t sample = rx_test_adc_read_once();
-
-            if (sample < min_value) {
-                min_value = sample;
-            }
-            if (sample > max_value) {
-                max_value = sample;
-            }
-        }
-
-        uint16_t span = (uint16_t)(max_value - min_value);
+        uint16_t span = rx_test_measure_span();
         uint8_t carrier_present = (span >= RX_TEST_SPAN_THRESHOLD_COUNTS) ? 1u : 0u;
 
         if (carrier_present != 0u) {
@@ -113,13 +121,15 @@ void application_rx_run(void)
             board_led_off();
         }
 
-        snprintf(buffer, sizeof(buffer), "min=%u max=%u span=%u carrier=%u\r\n",
-            (unsigned int)min_value,
-            (unsigned int)max_value,
-            (unsigned int)span,
-            (unsigned int)carrier_present);
-        uart_write_string(buffer);
+        bit_buffer[bit_index++] = carrier_present != 0u ? '1' : '0';
+        if (bit_index == 8u) {
+            for (uint32_t i = 0u; i < 8u; i++) {
+                uart_write_char(bit_buffer[i]);
+            }
+            uart_write_string("\r\n");
+            bit_index = 0u;
+        }
 
-        HAL_Delay(25);
+        HAL_Delay(OOK_PATTERN_SYMBOL_MS);
     }
 }

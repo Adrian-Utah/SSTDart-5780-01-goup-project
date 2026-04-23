@@ -2,6 +2,7 @@
 
 #include "app_config.h"
 #include "dds.h"
+#include "ook.h"
 #include "reflectometry.h"
 #include "stm32f0xx_hal.h"
 #include "uart.h"
@@ -29,6 +30,12 @@ void application_tx_init(void)
 #elif ACTIVE_TX_MODE == TX_MODE_UART_HEARTBEAT
     uart_write_string("MODE: UART HEARTBEAT\r\n");
     uart_write_string("Writing a UART heartbeat once per second.\r\n");
+#elif ACTIVE_TX_MODE == TX_MODE_PATTERN_TEST
+    uart_write_string("MODE: PATTERN TEST\r\n");
+    dds_set_amplitude(OOK_TEST_AMPLITUDE);
+    dds_set_frequency(OOK_TEST_FREQUENCY_HZ);
+    dds_output_off();
+    uart_write_string("TX will repeatedly send 0xAA as OOK bits.\r\n");
 #else
     uart_write_string("MODE: BYPASS ANTENNA CHECK\r\n");
     reflectometry_prepare_guarded_transmit(1u);
@@ -54,6 +61,10 @@ void application_tx_run(void)
     while (1) {
         uart_write_string("UART heartbeat\r\n");
         HAL_Delay(UART_HEARTBEAT_PERIOD_MS);
+    }
+#elif ACTIVE_TX_MODE == TX_MODE_PATTERN_TEST
+    while (1) {
+        ook_send_byte(OOK_PATTERN_TEST_BYTE, OOK_PATTERN_SYMBOL_MS * 8000u);
     }
 #else
     reflectometry_run_guarded_transmit(1u);
