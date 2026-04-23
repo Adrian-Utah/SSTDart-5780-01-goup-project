@@ -17,8 +17,9 @@ static uint16_t rx_test_measure_span(void)
 {
     uint16_t min_value = 0x0FFFu;
     uint16_t max_value = 0u;
+    uint32_t start_tick = HAL_GetTick();
 
-    for (uint32_t i = 0u; i < RX_TEST_ADC_SAMPLES_PER_WINDOW; i++) {
+    while ((HAL_GetTick() - start_tick) < OOK_PATTERN_SYMBOL_MS) {
         uint16_t sample = rx_test_adc_read_once();
 
         if (sample < min_value) {
@@ -129,7 +130,5 @@ void application_rx_run(void)
             uart_write_string("\r\n");
             bit_index = 0u;
         }
-
-        HAL_Delay(OOK_PATTERN_SYMBOL_MS);
     }
 }
