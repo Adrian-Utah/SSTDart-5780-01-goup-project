@@ -10,7 +10,6 @@
 #define RX_TEST_ADC_INPUT_PIN GPIO_PIN_1
 #define RX_TEST_ADC_INPUT_CHANNEL ADC_CHANNEL_1
 
-static ADC_HandleTypeDef hadc;
 static uint16_t rx_test_adc_read_once(void);
 
 static uint16_t rx_test_measure_span_for_ms(uint32_t duration_ms)
@@ -88,42 +87,42 @@ static void rx_wait_for_confirmation(void)
 
 static void rx_test_adc_init(void)
 {
-// Enable Peripherals Clocks (RCC)
-RCC->IOPENR  |= RCC_IOPENR_GPIOAEN;    // Enable GPIOA clock
-RCC->APB2ENR |= RCC_APB2ENR_ADC1EN;    // Enable ADC1 clock
-
-// Configure GPIOA Pin for Analog Mode
-// Assuming RX_TEST_ADC_INPUT_PIN is Pin X, we set MODER bits to 11 (Analog)
-GPIOA->MODER |= (3U << (RX_TEST_ADC_INPUT_PIN_POS * 2)); 
-
-// ADC Clock and Basic Configuration
-// ADC_CLOCK_ASYNC_DIV1 usually means using the HSI16 or internal RC oscillator
-ADC1->CFGR2 &= ~ADC_CFGR2_CKMODE;      // Asynchronous clock mode
-
-// Configure ADC Features (CFGR1)
-ADC1->CFGR1 &= ~(ADC_CFGR1_RES |       // 12-bit Resolution (00)
-                 ADC_CFGR1_ALIGN |     // Right alignment (0)
-                 ADC_CFGR1_CONT |      // Single conversion mode (0)
-                 ADC_CFGR1_EXTEN);     // Software trigger (00)
-
-ADC1->CFGR1 |= ADC_CFGR1_OVRMOD;       // Overrun: Data preserved (Keep old data)
-ADC1->CFGR1 |= ADC_CFGR1_SCANDIR;      // Scan direction: Forward
-
-// Configure Channel and Sampling Time
-// Select the channel in the CHSELR register
-ADC1->CHSELR |= (1U << RX_TEST_ADC_INPUT_CHANNEL); 
-
-// Set Sampling Time (SMPR) - 0x7 corresponds to 239.5 cycles
-ADC1->SMPR |= (0x7U << ADC_SMPR_SMP_Pos); 
-
-//Calibration
-if ((ADC1->CR & ADC_CR_ADEN) != 0) {
+  // Enable Peripherals Clocks (RCC)
+  RCC->AHBENR |= RCC_AHBENR_GPIOAEN; // Enable GPIOA clock
+  RCC->APB2ENR |= RCC_APB2ENR_ADC1EN; // Enable ADC1 clock
+  
+  // Configure GPIOA Pin for Analog Mode
+  // Assuming RX_TEST_ADC_INPUT_PIN is Pin X, we set MODER bits to 11 (Analog)
+  GPIOA->MODER |= (3U << (RX_TEST_ADC_INPUT_PIN * 2)); 
+  
+  // ADC Clock and Basic Configuration
+  // ADC_CLOCK_ASYNC_DIV1 usually means using the HSI16 or internal RC oscillator
+  ADC1->CFGR2 &= ~ADC_CFGR2_CKMODE;      // Asynchronous clock mode
+  
+  // Configure ADC Features (CFGR1)
+  ADC1->CFGR1 &= ~(ADC_CFGR1_RES |       // 12-bit Resolution (00)
+                   ADC_CFGR1_ALIGN |     // Right alignment (0)
+                   ADC_CFGR1_CONT |      // Single conversion mode (0)
+                   ADC_CFGR1_EXTEN);     // Software trigger (00)
+  
+  ADC1->CFGR1 |= ADC_CFGR1_OVRMOD;       // Overrun: Data preserved (Keep old data)
+  ADC1->CFGR1 |= ADC_CFGR1_SCANDIR;      // Scan direction: Forward
+  
+  // Configure Channel and Sampling Time
+  // Select the channel in the CHSELR register
+  ADC1->CHSELR |= (1U << RX_TEST_ADC_INPUT_CHANNEL); 
+  
+  // Set Sampling Time (SMPR) - 0x7 corresponds to 239.5 cycles
+  ADC1->SMPR |= (0x7U << ADC_SMPR_SMP_Pos); 
+  
+  //Calibration
+  if ((ADC1->CR & ADC_CR_ADEN) != 0) {
     ADC1->CR |= ADC_CR_ADDIS;          // Ensure ADC is disabled for calibration
-}
-while ((ADC1->CR & ADC_CR_ADEN) != 0); // Wait for disable
-
-ADC1->CR |= ADC_CR_ADCAL;              // Start calibration
-while ((ADC1->CR & ADC_CR_ADCAL) != 0); // Wait for calibration to finish
+  }
+  while ((ADC1->CR & ADC_CR_ADEN) != 0); // Wait for disable
+  
+  ADC1->CR |= ADC_CR_ADCAL;              // Start calibration
+  while ((ADC1->CR & ADC_CR_ADCAL) != 0); // Wait for calibration to finish
 }
 
 static uint16_t rx_test_adc_read_once(void)
