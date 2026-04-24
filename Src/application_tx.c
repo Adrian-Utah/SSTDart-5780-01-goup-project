@@ -1,11 +1,20 @@
 #include "application_tx.h"
 
+#include <stdio.h>
+
 #include "app_config.h"
 #include "dds.h"
 #include "packet.h"
 #include "reflectometry.h"
 #include "stm32f0xx_hal.h"
 #include "uart.h"
+
+static void tx_print_uint32(uint32_t value)
+{
+    char buffer[16];
+    snprintf(buffer, sizeof(buffer), "%lu", (unsigned long)value);
+    uart_write_string(buffer);
+}
 
 void application_tx_init(void)
 {
@@ -83,7 +92,7 @@ void application_tx_run(void)
         HAL_Delay(OOK_PATTERN_GAP_MS);
     }
 #elif ACTIVE_TX_MODE == TX_MODE_MESSAGE
-    char line_buffer[OOK_PACKET_MAX_PAYLOAD + 1u];
+    char line_buffer[TX_MESSAGE_MAX_LENGTH + 1u];
 
     while (1) {
         uart_write_string("Enter a message and press Enter:\r\n");
@@ -97,8 +106,13 @@ void application_tx_run(void)
         uart_write_string("Sending: ");
         uart_write_string(line_buffer);
         uart_write_string("\r\n");
+        uart_write_string("Length=");
+        tx_print_uint32(length);
+        uart_write_string(" bytes, fragments=");
+        tx_print_uint32((length + OOK_FRAGMENT_MAX_PAYLOAD - 1u) / OOK_FRAGMENT_MAX_PAYLOAD);
+        uart_write_string("\r\n");
 
-        packet_send((const uint8_t *)line_buffer, (uint8_t)length);
+        packet_send_message((const uint8_t *)line_buffer, (uint16_t)length);
 
         uart_write_string("Sent.\r\n");
     }

@@ -4,7 +4,8 @@
   Top-level branch mode selector.
 
   Set ACTIVE_APPLICATION_MODE to one of:
-  - APPLICATION_MODE_REFLECTOMETRY: run the Python-driven reflectometry sweep flow
+  - APPLICATION_MODE_REFLECTOMETRY: run one Python-driven reflectometry sweep flow,
+    then start the OOK transmit/message path
   - APPLICATION_MODE_OOK_TRANSMIT: run the OOK transmit/message path
   - APPLICATION_MODE_OOK_RECEIVE: run the OOK receive/message path
 */
@@ -71,8 +72,11 @@
 #define OOK_PACKET_PREAMBLE_BYTE   0x55u
 #define OOK_PACKET_PREAMBLE_LENGTH 4u
 #define OOK_PACKET_SYNC_BYTE       0xD5u
-#define OOK_PACKET_MAX_PAYLOAD     32u
+#define OOK_FRAGMENT_MAX_PAYLOAD   8u
 #define OOK_PACKET_INTER_GAP_MS    400u
+#define TX_MESSAGE_MAX_LENGTH      1024u
+#define RX_MESSAGE_BUFFER_SIZE     1024u
+#define RX_MESSAGE_TIMEOUT_MS      2000u
 
 #define HEALTH_TOLERANCE_PERCENT 5u
 #define HEALTH_MIN_TOLERANCE_COUNTS 3u

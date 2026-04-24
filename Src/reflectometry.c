@@ -52,17 +52,6 @@ static const char *load_label_for_sweep(uint32_t sweep_index)
     return "UNKNOWN";
 }
 
-static void transmit_sweep_prompt(uint32_t sweep_index)
-{
-    char buffer[48];
-
-    snprintf(buffer, sizeof(buffer), "SET LOAD TO %s, THEN PRESS BUTTON (%lu/%u)\r\n",
-        load_label_for_sweep(sweep_index),
-        (unsigned long)sweep_index,
-        REFLECTOMETRY_SWEEP_COUNT);
-    uart_write_string(buffer);
-}
-
 static void transmit_sweep_start(uint32_t sweep_index)
 {
     char buffer[48];
@@ -224,8 +213,8 @@ void reflectometry_init(void)
 
 void reflectometry_prepare_capture_session(void)
 {
-    uart_write_string("FOUR-SWEEP SESSION READY: OPEN, SHORT, MATCH, ANTENNA\r\n");
-    transmit_sweep_prompt(1u);
+    uart_write_string("SINGLE ANTENNA SWEEP READY\r\n");
+    uart_write_string("SET LOAD TO ANTENNA, THEN PRESS BUTTON\r\n");
     dds_set_amplitude(REFLECTOMETRY_AMPLITUDE);
     dds_set_frequency(REFLECTOMETRY_SWEEP_START_HZ);
     board_led_off();
@@ -235,12 +224,9 @@ void reflectometry_run_capture_session(void)
 {
     uint16_t magnitudes[REFLECTOMETRY_SWEEP_STEPS];
 
-    for (uint32_t sweep_index = 1u; sweep_index <= REFLECTOMETRY_SWEEP_COUNT; sweep_index++) {
-        transmit_sweep_prompt(sweep_index);
-        board_wait_for_button_press();
-        collect_sweep(magnitudes, 1u, sweep_index);
-        board_wait_for_button_release();
-    }
+    board_wait_for_button_press();
+    collect_sweep(magnitudes, 1u, 4u);
+    board_wait_for_button_release();
 
     uart_write_string("SESSION COMPLETE\r\n");
 }
