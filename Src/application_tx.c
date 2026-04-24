@@ -2,6 +2,7 @@
 
 #include "app_config.h"
 #include "dds.h"
+#include "packet.h"
 #include "reflectometry.h"
 #include "stm32f0xx_hal.h"
 #include "uart.h"
@@ -35,6 +36,11 @@ void application_tx_init(void)
     dds_set_frequency(OOK_TEST_FREQUENCY_HZ);
     dds_output_off();
     uart_write_string("TX will repeatedly send 0xAA as OOK bits.\r\n");
+#elif ACTIVE_TX_MODE == TX_MODE_MESSAGE
+    uart_write_string("MODE: MESSAGE\r\n");
+    dds_set_amplitude(OOK_TEST_AMPLITUDE);
+    dds_set_frequency(OOK_TEST_FREQUENCY_HZ);
+    dds_output_off();
 #else
     uart_write_string("MODE: BYPASS ANTENNA CHECK\r\n");
     reflectometry_prepare_guarded_transmit(1u);
@@ -75,6 +81,26 @@ void application_tx_run(void)
 
         dds_output_off();
         HAL_Delay(OOK_PATTERN_GAP_MS);
+    }
+#elif ACTIVE_TX_MODE == TX_MODE_MESSAGE
+    char line_buffer[OOK_PACKET_MAX_PAYLOAD + 1u];
+
+    while (1) {
+        uart_write_string("Enter a message and press Enter:\r\n");
+        uint32_t length = uart_read_line(line_buffer, sizeof(line_buffer));
+
+        if (length == 0u) {
+            uart_write_string("Empty message, ignored.\r\n");
+            continue;
+        }
+
+        uart_write_string("Sending: ");
+        uart_write_string(line_buffer);
+        uart_write_string("\r\n");
+
+        packet_send((const uint8_t *)line_buffer, (uint8_t)length);
+
+        uart_write_string("Sent.\r\n");
     }
 #else
     reflectometry_run_guarded_transmit(1u);

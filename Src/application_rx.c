@@ -4,6 +4,7 @@
 
 #include "app_config.h"
 #include "board.h"
+#include "packet.h"
 #include "stm32f0xx_hal.h"
 #include "uart.h"
 
@@ -156,10 +157,124 @@ void application_rx_init(void)
 {
     rx_test_adc_init();
     uart_write_string("PROGRAM STARTED\r\n");
-    uart_write_string("MODE: RX APPLICATION\r\n");
+#if ACTIVE_RX_MODE == RX_MODE_MESSAGE
+    uart_write_string("MODE: MESSAGE\r\n");
+    uart_write_string("Waiting for a packet, then printing the decoded message.\r\n");
+#else
+    uart_write_string("MODE: PATTERN TEST\r\n");
     uart_write_string("Waiting for a gap, then center-sampling 8 OOK bits on PA1.\r\n");
+#endif
     rx_wait_for_confirmation();
 }
+
+#if ACTIVE_RX_MODE == RX_MODE_MESSAGE
+
+#define RX_PACKET_OK 0
+#define RX_PACKET_ERR_SYNC 1
+#define RX_PACKET_ERR_LENGTH 2
+#define RX_PACKET_ERR_CRC 3
+
+static uint8_t rx_read_bit(void)
+{
+    uint16_t span = rx_test_measure_span_for_ms(RX_CENTER_SAMPLE_MS);
+    uint8_t bit = (span >= RX_TEST_SPAN_THRESHOLD_COUNTS) ? 1u : 0u;
+
+    if (bit != 0u) {
+        board_led_on();
+    } else {
+        board_led_off();
+    }
+
+    HAL_Delay(OOK_PATTERN_SYMBOL_MS - RX_CENTER_SAMPLE_MS);
+    return bit;
+}
+
+static uint8_t rx_read_byte(void)
+{
+    uint8_t value = 0u;
+    for (uint8_t i = 0u; i < 8u; i++) {
+        value = (uint8_t)((value << 1) | rx_read_bit());
+    }
+    return value;
+}
+
+static int rx_receive_packet(uint8_t *out_buffer, uint8_t out_capacity, uint8_t *out_length)
+{
+    rx_wait_for_pattern_start();
+    HAL_Delay(OOK_PATTERN_SYMBOL_MS / 2u);
+
+    uint8_t shift_register = 0u;
+    uint32_t max_sync_bits = (uint32_t)(OOK_PACKET_PREAMBLE_LENGTH + 4u) * 8u;
+
+    for (uint32_t i = 0u; i < max_sync_bits; i++) {
+        shift_register = (uint8_t)((shift_register << 1) | rx_read_bit());
+        if (shift_register == OOK_PACKET_SYNC_BYTE) {
+            break;
+        }
+        if (i + 1u == max_sync_bits) {
+            return RX_PACKET_ERR_SYNC;
+        }
+    }
+
+    uint8_t length = rx_read_byte();
+    if ((length == 0u) || (length > out_capacity)) {
+        return RX_PACKET_ERR_LENGTH;
+    }
+
+    uint8_t header_and_payload[1u + OOK_PACKET_MAX_PAYLOAD];
+    header_and_payload[0] = length;
+    for (uint8_t i = 0u; i < length; i++) {
+        header_and_payload[1u + i] = rx_read_byte();
+        out_buffer[i] = header_and_payload[1u + i];
+    }
+
+    uint8_t received_crc = rx_read_byte();
+    uint8_t expected_crc = packet_crc8(header_and_payload, (uint16_t)(1u + length));
+    if (received_crc != expected_crc) {
+        return RX_PACKET_ERR_CRC;
+    }
+
+    *out_length = length;
+    return RX_PACKET_OK;
+}
+
+void application_rx_run(void)
+{
+    uint8_t payload[OOK_PACKET_MAX_PAYLOAD];
+    char print_buffer[OOK_PACKET_MAX_PAYLOAD + 1u];
+
+    while (1) {
+        uint8_t length = 0u;
+        int result = rx_receive_packet(payload, sizeof(payload), &length);
+
+        switch (result) {
+        case RX_PACKET_OK:
+            for (uint8_t i = 0u; i < length; i++) {
+                uint8_t byte = payload[i];
+                print_buffer[i] = ((byte >= 0x20u) && (byte < 0x7Fu)) ? (char)byte : '.';
+            }
+            print_buffer[length] = '\0';
+            uart_write_string("RX: ");
+            uart_write_string(print_buffer);
+            uart_write_string("\r\n");
+            break;
+        case RX_PACKET_ERR_SYNC:
+            uart_write_string("RX error: sync not found.\r\n");
+            break;
+        case RX_PACKET_ERR_LENGTH:
+            uart_write_string("RX error: bad length.\r\n");
+            break;
+        case RX_PACKET_ERR_CRC:
+            uart_write_string("RX error: CRC mismatch.\r\n");
+            break;
+        default:
+            uart_write_string("RX error: unknown.\r\n");
+            break;
+        }
+    }
+}
+
+#else
 
 void application_rx_run(void)
 {
@@ -191,3 +306,5 @@ void application_rx_run(void)
         uart_write_string("\r\n");
     }
 }
+
+#endif
