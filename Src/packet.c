@@ -22,15 +22,22 @@ uint8_t packet_crc8(const uint8_t *data, uint16_t length)
     return crc;
 }
 
-static void packet_send_byte(uint8_t value)
+static void packet_wait_until(uint32_t target_tick)
+{
+    while ((int32_t)(target_tick - HAL_GetTick()) > 0) {
+    }
+}
+
+static void packet_send_byte_at(uint8_t value, uint32_t *next_edge_tick)
 {
     for (int bit_index = 7; bit_index >= 0; bit_index--) {
+        packet_wait_until(*next_edge_tick);
         if (((value >> bit_index) & 0x1u) != 0u) {
             dds_output_on();
         } else {
             dds_output_off();
         }
-        HAL_Delay(OOK_PATTERN_SYMBOL_MS);
+        *next_edge_tick += OOK_PATTERN_SYMBOL_MS;
     }
 }
 
@@ -43,16 +50,18 @@ void packet_send(const uint8_t *payload, uint8_t length)
     }
     uint8_t crc = packet_crc8(header_and_payload, (uint16_t)(1u + length));
 
+    uint32_t next_edge_tick = HAL_GetTick();
     for (uint8_t i = 0u; i < OOK_PACKET_PREAMBLE_LENGTH; i++) {
-        packet_send_byte(OOK_PACKET_PREAMBLE_BYTE);
+        packet_send_byte_at(OOK_PACKET_PREAMBLE_BYTE, &next_edge_tick);
     }
-    packet_send_byte(OOK_PACKET_SYNC_BYTE);
-    packet_send_byte(length);
+    packet_send_byte_at(OOK_PACKET_SYNC_BYTE, &next_edge_tick);
+    packet_send_byte_at(length, &next_edge_tick);
     for (uint8_t i = 0u; i < length; i++) {
-        packet_send_byte(payload[i]);
+        packet_send_byte_at(payload[i], &next_edge_tick);
     }
-    packet_send_byte(crc);
+    packet_send_byte_at(crc, &next_edge_tick);
 
+    packet_wait_until(next_edge_tick);
     dds_output_off();
     HAL_Delay(OOK_PACKET_INTER_GAP_MS);
 }

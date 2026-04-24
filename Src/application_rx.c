@@ -174,8 +174,15 @@ void application_rx_init(void)
 #define RX_PACKET_ERR_LENGTH 2
 #define RX_PACKET_ERR_CRC 3
 
-static uint8_t rx_read_bit(void)
+static void rx_wait_until(uint32_t target_tick)
 {
+    while ((int32_t)(target_tick - HAL_GetTick()) > 0) {
+    }
+}
+
+static uint8_t rx_read_bit_at(uint32_t *next_sample_tick)
+{
+    rx_wait_until(*next_sample_tick);
     uint16_t span = rx_test_measure_span_for_ms(RX_CENTER_SAMPLE_MS);
     uint8_t bit = (span >= RX_TEST_SPAN_THRESHOLD_COUNTS) ? 1u : 0u;
 
@@ -185,29 +192,44 @@ static uint8_t rx_read_bit(void)
         board_led_off();
     }
 
-    HAL_Delay(OOK_PATTERN_SYMBOL_MS - RX_CENTER_SAMPLE_MS);
+    *next_sample_tick += OOK_PATTERN_SYMBOL_MS;
     return bit;
 }
 
-static uint8_t rx_read_byte(void)
+static uint8_t rx_read_byte_at(uint32_t *next_sample_tick)
 {
     uint8_t value = 0u;
     for (uint8_t i = 0u; i < 8u; i++) {
-        value = (uint8_t)((value << 1) | rx_read_bit());
+        value = (uint8_t)((value << 1) | rx_read_bit_at(next_sample_tick));
     }
     return value;
 }
 
-static int rx_receive_packet(uint8_t *out_buffer, uint8_t out_capacity, uint8_t *out_length)
+static void rx_print_hex_byte(uint8_t value)
 {
+    static const char hex[] = "0123456789ABCDEF";
+    char buffer[3];
+    buffer[0] = hex[(value >> 4) & 0xFu];
+    buffer[1] = hex[value & 0xFu];
+    buffer[2] = '\0';
+    uart_write_string(buffer);
+}
+
+static int rx_receive_packet(uint8_t *out_buffer, uint8_t out_capacity, uint8_t *out_length,
+                             uint8_t *out_received_crc, uint8_t *out_expected_crc)
+{
+    *out_length = 0u;
+    *out_received_crc = 0u;
+    *out_expected_crc = 0u;
+
     rx_wait_for_pattern_start();
-    HAL_Delay(OOK_PATTERN_SYMBOL_MS / 2u);
+    uint32_t next_sample_tick = HAL_GetTick() + (OOK_PATTERN_SYMBOL_MS / 2u);
 
     uint8_t shift_register = 0u;
     uint32_t max_sync_bits = (uint32_t)(OOK_PACKET_PREAMBLE_LENGTH + 4u) * 8u;
 
     for (uint32_t i = 0u; i < max_sync_bits; i++) {
-        shift_register = (uint8_t)((shift_register << 1) | rx_read_bit());
+        shift_register = (uint8_t)((shift_register << 1) | rx_read_bit_at(&next_sample_tick));
         if (shift_register == OOK_PACKET_SYNC_BYTE) {
             break;
         }
@@ -216,26 +238,35 @@ static int rx_receive_packet(uint8_t *out_buffer, uint8_t out_capacity, uint8_t 
         }
     }
 
-    uint8_t length = rx_read_byte();
+    uint8_t length = rx_read_byte_at(&next_sample_tick);
     if ((length == 0u) || (length > out_capacity)) {
+        *out_length = length;
         return RX_PACKET_ERR_LENGTH;
     }
+    *out_length = length;
 
     uint8_t header_and_payload[1u + OOK_PACKET_MAX_PAYLOAD];
     header_and_payload[0] = length;
     for (uint8_t i = 0u; i < length; i++) {
-        header_and_payload[1u + i] = rx_read_byte();
+        header_and_payload[1u + i] = rx_read_byte_at(&next_sample_tick);
         out_buffer[i] = header_and_payload[1u + i];
     }
 
-    uint8_t received_crc = rx_read_byte();
-    uint8_t expected_crc = packet_crc8(header_and_payload, (uint16_t)(1u + length));
-    if (received_crc != expected_crc) {
+    *out_received_crc = rx_read_byte_at(&next_sample_tick);
+    *out_expected_crc = packet_crc8(header_and_payload, (uint16_t)(1u + length));
+    if (*out_received_crc != *out_expected_crc) {
         return RX_PACKET_ERR_CRC;
     }
 
-    *out_length = length;
     return RX_PACKET_OK;
+}
+
+static void rx_print_payload_hex(const uint8_t *payload, uint8_t length)
+{
+    for (uint8_t i = 0u; i < length; i++) {
+        rx_print_hex_byte(payload[i]);
+        uart_write_string(" ");
+    }
 }
 
 void application_rx_run(void)
@@ -245,7 +276,9 @@ void application_rx_run(void)
 
     while (1) {
         uint8_t length = 0u;
-        int result = rx_receive_packet(payload, sizeof(payload), &length);
+        uint8_t received_crc = 0u;
+        uint8_t expected_crc = 0u;
+        int result = rx_receive_packet(payload, sizeof(payload), &length, &received_crc, &expected_crc);
 
         switch (result) {
         case RX_PACKET_OK:
@@ -262,10 +295,20 @@ void application_rx_run(void)
             uart_write_string("RX error: sync not found.\r\n");
             break;
         case RX_PACKET_ERR_LENGTH:
-            uart_write_string("RX error: bad length.\r\n");
+            uart_write_string("RX error: bad length=");
+            rx_print_hex_byte(length);
+            uart_write_string("\r\n");
             break;
         case RX_PACKET_ERR_CRC:
-            uart_write_string("RX error: CRC mismatch.\r\n");
+            uart_write_string("RX error: CRC mismatch. len=");
+            rx_print_hex_byte(length);
+            uart_write_string(" crc_rx=");
+            rx_print_hex_byte(received_crc);
+            uart_write_string(" crc_calc=");
+            rx_print_hex_byte(expected_crc);
+            uart_write_string(" payload=");
+            rx_print_payload_hex(payload, length);
+            uart_write_string("\r\n");
             break;
         default:
             uart_write_string("RX error: unknown.\r\n");
