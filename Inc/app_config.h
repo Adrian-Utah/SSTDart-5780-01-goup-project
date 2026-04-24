@@ -1,5 +1,22 @@
 #pragma once
 
+/*
+  Top-level branch mode selector.
+
+  Set ACTIVE_APPLICATION_MODE to one of:
+  - APPLICATION_MODE_REFLECTOMETRY: run the Python-driven reflectometry sweep flow
+  - APPLICATION_MODE_OOK_TRANSMIT: run the OOK transmit/message path
+  - APPLICATION_MODE_OOK_RECEIVE: run the OOK receive/message path
+*/
+
+#define APPLICATION_MODE_REFLECTOMETRY 0u
+#define APPLICATION_MODE_OOK_TRANSMIT 1u
+#define APPLICATION_MODE_OOK_RECEIVE 2u
+
+#ifndef ACTIVE_APPLICATION_MODE
+#define ACTIVE_APPLICATION_MODE APPLICATION_MODE_REFLECTOMETRY
+#endif
+
 #define APPLICATION_ROLE_TX 0u
 #define APPLICATION_ROLE_RX 1u
 
