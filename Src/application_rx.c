@@ -88,47 +88,68 @@ static void rx_wait_for_confirmation(void)
 
 static void rx_test_adc_init(void)
 {
-    __HAL_RCC_GPIOA_CLK_ENABLE();
-    __HAL_RCC_ADC1_CLK_ENABLE();
+// Enable Peripherals Clocks (RCC)
+RCC->IOPENR  |= RCC_IOPENR_GPIOAEN;    // Enable GPIOA clock
+RCC->APB2ENR |= RCC_APB2ENR_ADC1EN;    // Enable ADC1 clock
 
-    GPIO_InitTypeDef gpio = {0};
-    ADC_ChannelConfTypeDef config = {0};
+// Configure GPIOA Pin for Analog Mode
+// Assuming RX_TEST_ADC_INPUT_PIN is Pin X, we set MODER bits to 11 (Analog)
+GPIOA->MODER |= (3U << (RX_TEST_ADC_INPUT_PIN_POS * 2)); 
 
-    gpio.Pin = RX_TEST_ADC_INPUT_PIN;
-    gpio.Mode = GPIO_MODE_ANALOG;
-    gpio.Pull = GPIO_NOPULL;
-    HAL_GPIO_Init(GPIOA, &gpio);
+// ADC Clock and Basic Configuration
+// ADC_CLOCK_ASYNC_DIV1 usually means using the HSI16 or internal RC oscillator
+ADC1->CFGR2 &= ~ADC_CFGR2_CKMODE;      // Asynchronous clock mode
 
-    hadc.Instance = ADC1;
-    hadc.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV1;
-    hadc.Init.Resolution = ADC_RESOLUTION_12B;
-    hadc.Init.DataAlign = ADC_DATAALIGN_RIGHT;
-    hadc.Init.ScanConvMode = ADC_SCAN_DIRECTION_FORWARD;
-    hadc.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
-    hadc.Init.LowPowerAutoWait = DISABLE;
-    hadc.Init.LowPowerAutoPowerOff = DISABLE;
-    hadc.Init.ContinuousConvMode = DISABLE;
-    hadc.Init.DiscontinuousConvMode = DISABLE;
-    hadc.Init.ExternalTrigConv = ADC_SOFTWARE_START;
-    hadc.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
-    hadc.Init.DMAContinuousRequests = DISABLE;
-    hadc.Init.Overrun = ADC_OVR_DATA_PRESERVED;
-    HAL_ADC_Init(&hadc);
+// Configure ADC Features (CFGR1)
+ADC1->CFGR1 &= ~(ADC_CFGR1_RES |       // 12-bit Resolution (00)
+                 ADC_CFGR1_ALIGN |     // Right alignment (0)
+                 ADC_CFGR1_CONT |      // Single conversion mode (0)
+                 ADC_CFGR1_EXTEN);     // Software trigger (00)
 
-    config.Channel = RX_TEST_ADC_INPUT_CHANNEL;
-    config.Rank = ADC_RANK_CHANNEL_NUMBER;
-    config.SamplingTime = ADC_SAMPLETIME_239CYCLES_5;
-    HAL_ADC_ConfigChannel(&hadc, &config);
+ADC1->CFGR1 |= ADC_CFGR1_OVRMOD;       // Overrun: Data preserved (Keep old data)
+ADC1->CFGR1 |= ADC_CFGR1_SCANDIR;      // Scan direction: Forward
 
-    HAL_ADCEx_Calibration_Start(&hadc);
+// Configure Channel and Sampling Time
+// Select the channel in the CHSELR register
+ADC1->CHSELR |= (1U << RX_TEST_ADC_INPUT_CHANNEL); 
+
+// Set Sampling Time (SMPR) - 0x7 corresponds to 239.5 cycles
+ADC1->SMPR |= (0x7U << ADC_SMPR_SMP_Pos); 
+
+//Calibration
+if ((ADC1->CR & ADC_CR_ADEN) != 0) {
+    ADC1->CR |= ADC_CR_ADDIS;          // Ensure ADC is disabled for calibration
+}
+while ((ADC1->CR & ADC_CR_ADEN) != 0); // Wait for disable
+
+ADC1->CR |= ADC_CR_ADCAL;              // Start calibration
+while ((ADC1->CR & ADC_CR_ADCAL) != 0); // Wait for calibration to finish
 }
 
 static uint16_t rx_test_adc_read_once(void)
 {
-    HAL_ADC_Start(&hadc);
-    HAL_ADC_PollForConversion(&hadc, HAL_MAX_DELAY);
-    uint16_t value = (uint16_t)HAL_ADC_GetValue(&hadc);
-    HAL_ADC_Stop(&hadc);
+    // Enable the ADC if it isn't already
+    if ((ADC1->CR & ADC_CR_ADEN) == 0) {
+        ADC1->ISR |= ADC_ISR_ADRDY;      // Clear the ADRDY flag by writing 1
+        ADC1->CR |= ADC_CR_ADEN;         // Enable the ADC
+        while (!(ADC1->ISR & ADC_ISR_ADRDY)); // Wait until ADC is ready
+    }
+
+    // Start the conversion
+    ADC1->CR |= ADC_CR_ADSTART;
+
+    // Poll for conversion completion (EOC flag)
+    while (!(ADC1->ISR & ADC_ISR_EOC));
+
+    //Read the value (This also clears the EOC flag automatically)
+    uint16_t value = (uint16_t)ADC1->DR;
+
+    // Stop the ADC
+    if ((ADC1->CR & ADC_CR_ADSTART) != 0) {
+        ADC1->CR |= ADC_CR_ADSTP;
+        while (ADC1->CR & ADC_CR_ADSTP); // Wait for stop to complete
+    }
+
     return value;
 }
 
