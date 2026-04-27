@@ -13,6 +13,9 @@
   Change ACTIVE_APPLICATION_MODE in Inc/app_config.h to choose one of:
   - APPLICATION_MODE_REFLECTOMETRY:
     Runs one reflectometry capture session, then starts the OOK transmit app.
+  - APPLICATION_MODE_PASS_REFLECTOMETRY_CHECK:
+    Runs the internal reflectometry health check and starts OOK transmit only
+    after the check passes.
   - APPLICATION_MODE_OOK_TRANSMIT:
     Runs the OOK transmit message path from the OOK branch.
   - APPLICATION_MODE_OOK_RECEIVE:
@@ -47,6 +50,21 @@ int main(void)
     reflectometry_prepare_capture_session();
     reflectometry_run_capture_session();
     uart_write_string("REFLECTOMETRY COMPLETE - STARTING OOK TRANSMIT\r\n");
+    application_tx_init();
+    application_tx_run();
+#elif ACTIVE_APPLICATION_MODE == APPLICATION_MODE_PASS_REFLECTOMETRY_CHECK
+    dds_init();
+    reflectometry_init();
+    uart_write_string("PROGRAM STARTED\r\n");
+    uart_write_string("MODE: PASS REFLECTOMETRY CHECK THEN OOK TRANSMIT\r\n");
+    reflectometry_prepare_health_check();
+
+    while (reflectometry_run_health_check_once() == 0u) {
+        uart_write_string("REFLECTOMETRY CHECK FAILED - RETRY WHEN READY\r\n");
+        reflectometry_prepare_health_check();
+    }
+
+    uart_write_string("REFLECTOMETRY CHECK PASSED - STARTING OOK TRANSMIT\r\n");
     application_tx_init();
     application_tx_run();
 #elif ACTIVE_APPLICATION_MODE == APPLICATION_MODE_OOK_TRANSMIT

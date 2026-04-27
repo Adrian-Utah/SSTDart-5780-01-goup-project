@@ -231,6 +231,26 @@ void reflectometry_run_capture_session(void)
     uart_write_string("SESSION COMPLETE\r\n");
 }
 
+void reflectometry_prepare_health_check(void)
+{
+    dds_set_amplitude(REFLECTOMETRY_AMPLITUDE);
+    dds_set_frequency(REFLECTOMETRY_SWEEP_START_HZ);
+    uart_write_string("PRESS BUTTON TO RUN INTERNAL REFLECTOMETRY CHECK\r\n");
+    board_led_off();
+}
+
+uint8_t reflectometry_run_health_check_once(void)
+{
+    board_wait_for_button_press();
+    uart_write_string("RUNNING INTERNAL REFLECTOMETRY CHECK\r\n");
+    dds_set_amplitude(REFLECTOMETRY_AMPLITUDE);
+    dds_set_frequency(REFLECTOMETRY_SWEEP_START_HZ);
+    uint8_t antenna_ok = antenna_health_is_ok();
+    board_wait_for_button_release();
+
+    return antenna_ok;
+}
+
 void reflectometry_prepare_guarded_transmit(uint8_t bypass_health_check)
 {
     if (bypass_health_check != 0u) {

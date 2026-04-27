@@ -6,6 +6,8 @@
   Set ACTIVE_APPLICATION_MODE to one of:
   - APPLICATION_MODE_REFLECTOMETRY: run one Python-driven reflectometry sweep flow,
     then start the OOK transmit/message path
+  - APPLICATION_MODE_PASS_REFLECTOMETRY_CHECK: run one internal reflectometry
+    health check, then start the OOK transmit/message path only if it passes
   - APPLICATION_MODE_OOK_TRANSMIT: run the OOK transmit/message path
   - APPLICATION_MODE_OOK_RECEIVE: run the OOK receive/message path
 */
@@ -13,6 +15,7 @@
 #define APPLICATION_MODE_REFLECTOMETRY 0u
 #define APPLICATION_MODE_OOK_TRANSMIT 1u
 #define APPLICATION_MODE_OOK_RECEIVE 2u
+#define APPLICATION_MODE_PASS_REFLECTOMETRY_CHECK 3u
 
 #ifndef ACTIVE_APPLICATION_MODE
 #define ACTIVE_APPLICATION_MODE APPLICATION_MODE_REFLECTOMETRY
