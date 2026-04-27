@@ -56,3 +56,7 @@ Bench note from 4/10/26:
 - we reached a working DDS sweep and UART reporting path today
 - output amplitude is still the main blocker for the downstream RF chain
 - we are waiting on a proper RF attenuator so the amplifier/splitter/coupler/mixer path can be tested at controlled levels without overdriving the next stages
+
+AI tool use:
+
+AI tools were used for grammar editing, debugging suggestions, and organization of written sections. All design decisions, implementation, testing, and final technical content were reviewed and completed by the project team.
